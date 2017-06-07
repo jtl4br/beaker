@@ -12,54 +12,56 @@ api = Api(app)
 
 def connect(db, host='localhost', port=5432):
 	# We connect with the help of the PostgreSQL URL
-    # postgresql://user:passlocalhost:5432/database
-    print 'Connecting...'
-    url = 'postgresql://{}:{}/{}'
-    url = url.format(host, port, db)
-    print url
+	# postgresql://user:passlocalhost:5432/database
+	print 'Connecting...'
+	url = 'postgresql://{}:{}/{}'
+	url = url.format(host, port, db)
+	print url
 
-    con = sqlalchemy.create_engine(url, client_encoding='utf8')
-    print 'con'
-    meta = sqlalchemy.MetaData(bind=con, reflect=True)
-    print 'meta'
-    print con
-    print meta
-    return con, meta
+	con = sqlalchemy.create_engine(url, client_encoding='utf8')
+	meta = sqlalchemy.MetaData(bind=con, reflect=True)
+	return con, meta
 
 class AuthenticateUser(Resource):
-    def post(self):
-    	print 'authenticating...'
-        try:
-            # Parse the arguments
-            con, meta = connect('beaker')
-            print con
-            print meta
-            
-            parser = reqparse.RequestParser()
-            parser.add_argument('username', type=str, help='Username for Authentication')
-            parser.add_argument('password', type=str, help='Password for Authentication')
-            args = parser.parse_args()
+	def post(self):
+		print 'authenticating...'
+		try:
+			# Parse the arguments
+			con, meta = connect('beaker')
+			print con
+			print meta
+			
+			parser = reqparse.RequestParser()
+			parser.add_argument('username', type=str, help='Username for Authentication')
+			parser.add_argument('password', type=str, help='Password for Authentication')
+			args = parser.parse_args()
 
-            _userUsername = args['username']
-            _userPassword = args['password']
+			_userUsername = args['username']
+			_userPassword = args['password']
 
-            print _userUsername
-            print _userPassword
+			print _userUsername
+			print _userPassword
 
-            users = Table('users', meta, autoload=True)
-            data = users.select(and_(users.username == _userUsername, users.password == _userPassword)).execute()
-            print data
+			if _userUsername is None or _userPassword is None:
+				raise Exception('Username and password required')
+			users = Table('users', meta, autoload=True)
 
-            if(len(data)>0):
-                if(data):
-                    #Format return into JSON object
-                    resp = Response(js, status=200, mimetype='application/json')
-                    return resp
-                else:
-                    return {'status':100,'message':'Authentication failure'}
+			s = sqlalchemy.select([users]).where(users.c.username == _userUsername).where(users.c.password == _userPassword)
 
-        except Exception as e:
-            return {'error': str(e)}
+			data = con.execute(s)
+			row = data.fetchone()
+			print row
+
+			if (row is not None):
+				print 'GOOD'
+				resp = Response(js, status=200, mimetype='application/json')
+				return resp
+			else:
+				print 'BAD'
+				return Response(js, status=100, mimetype='application/json')
+
+		except Exception as e:
+			return {'error': str(e)}
 
 
 
@@ -68,21 +70,21 @@ KAFKA_TOPIC = 'beakertopic'
 
 @app.after_request
 def add_header(r):
-    """
-    Add headers to both force latest IE rendering engine or Chrome Frame,
-    and also to cache the rendered page for 10 minutes.
-    """
-    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    r.headers["Pragma"] = "no-cache"
-    r.headers["Expires"] = "0"
-    r.headers['Cache-Control'] = 'public, max-age=0'
-    return r
+	"""
+	Add headers to both force latest IE rendering engine or Chrome Frame,
+	and also to cache the rendered page for 10 minutes.
+	"""
+	r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+	r.headers["Pragma"] = "no-cache"
+	r.headers["Expires"] = "0"
+	r.headers['Cache-Control'] = 'public, max-age=0'
+	return r
 
 @app.route('/')
 def login():
-    #if 'username' in session:
-        #return redirect('/dashboard')
-    return app.send_static_file('index.html')
+	#if 'username' in session:
+		#return redirect('/dashboard')
+	return app.send_static_file('index.html')
 
 #@app.route("/")
 #def hello():
@@ -146,4 +148,4 @@ api.add_resource(AuthenticateUser, '/api/AuthenticateUser')
 
 
 if __name__ == "__main__":
-    app.run()
+	app.run()

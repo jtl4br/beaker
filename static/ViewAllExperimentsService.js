@@ -5,7 +5,7 @@ angular.module('myApp').factory('ViewAllExperimentsService',
         return $http.get('/api/Experiment', {params: {username: username}})
         .success(function (data) {
             return data;
-        })oo
+        })
         .error(function(data,status) {
             console.error("Get experiment Error", status, data);
         });
