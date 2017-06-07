@@ -7,6 +7,10 @@ myApp.config(function ($routeProvider) {
         templateUrl: 'static/partials/login.html',
         controller: 'loginController'
     })
+    .when('/experiments', {
+        templateUrl: 'static/partials/experiments.html',
+        controller: 'experimentController'
+    })
     .otherwise({
         redirectTo: '/'
     });
