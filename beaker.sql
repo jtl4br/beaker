@@ -85,13 +85,6 @@ CREATE TABLE users (
 ALTER TABLE users OWNER TO yoogchu;
 
 --
--- Name: experiments id; Type: DEFAULT; Schema: public; Owner: yoogchu
---
-
-ALTER TABLE ONLY experiments ALTER COLUMN id SET DEFAULT nextval('experiments_id_seq'::regclass);
-
-
---
 -- Data for Name: experiments; Type: TABLE DATA; Schema: public; Owner: yoogchu
 --
 
@@ -100,6 +93,21 @@ COPY experiments (id, name, product, start_date, end_date, active) FROM stdin;
 2	02	gold	2017-06-06	2017-06-07	t
 3	03	silver	2017-06-05	2017-06-07	f
 4	04	platinum	2017-06-06	2017-06-07	t
+5	05	gold	2017-06-04	2017-06-05	t
+6	06	silver	2017-06-04	2017-06-05	t
+7	07	platinum	2017-06-04	2017-06-05	t
+8	08	silver	2017-06-04	2017-06-05	t
+9	09	platinum	2017-06-04	2017-06-05	t
+10	010	silver	2017-06-04	2017-06-05	t
+11	011	platinum	2017-06-04	2017-06-05	t
+12	012	silver	2017-06-04	2017-06-05	t
+13	013	gold	2017-06-04	2017-06-05	f
+14	014	platinum	2017-06-04	2017-06-05	t
+15	015	platinum	2017-06-04	2017-06-05	t
+16	016	gold	2017-06-04	2017-06-05	f
+17	017	gold	2017-06-04	2017-06-05	f
+18	018	platinum	2017-06-04	2017-06-05	t
+19	019	gold	2017-06-04	2017-06-05	f
 \.
 
 
@@ -107,7 +115,7 @@ COPY experiments (id, name, product, start_date, end_date, active) FROM stdin;
 -- Name: experiments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: yoogchu
 --
 
-SELECT pg_catalog.setval('experiments_id_seq', 4, true);
+SELECT pg_catalog.setval('experiments_id_seq', 19, true);
 
 
 --
