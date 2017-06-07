@@ -1,6 +1,6 @@
 angular.module('myApp').controller('loginController',
   ['$scope', '$location', 'LoginService',
-  function ($scope, $location, UserService) {
+  function ($scope, $location, LoginService) {
     $scope.username = 'user';
 
     $scope.authenticate = function () {
@@ -21,7 +21,7 @@ angular.module('myApp').controller('loginController',
       }
 
       // call login from service
-      UserService.authenticate($scope.loginForm.username, $scope.loginForm.password)
+      LoginService.authenticate($scope.loginForm.username, $scope.loginForm.password)
         // handle success
         .success(function (data) {
           //$location.path('/main');
