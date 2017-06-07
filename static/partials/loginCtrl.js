@@ -27,7 +27,7 @@ angular.module('myApp').controller('loginController',
           //$location.path('/main');
           if (data) {
             // redirect to main page depending on type
-            $location.path('/main');
+            $location.path('/experiments');
             $location
             $scope.loginForm = {};
           } else {
