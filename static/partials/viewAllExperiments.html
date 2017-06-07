@@ -1,6 +1,15 @@
 <div class="container-fluid">
-<div class="container jumbotron">
+<div class="container jumbotron" align="center">
 	<h1>Experiments</h1>
-	<h1 ng-repeat="name in data.experiments"> //name//</h1>
+	<table ng-repeat="experiment in data.experiments">
+		<tr>
+			<div>
+				<img src="./assets/img/experiment_icon.png" style="width:150px;height:150px;">
+				</br>
+				<h3>ID: {{experiment.id}}</h3>
+			</div>
+		</tr>
+		<!--<h1 ng-repeat="name in data.experiments"> //name//</h1>-->
+	</table>
 </div>
 </div>
