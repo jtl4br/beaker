@@ -1,12 +1,59 @@
 from flask import Flask, Response, json, send_file, render_template, request, jsonify, make_response, session, redirect, url_for
 from flask_restful import Resource, Api, reqparse
+from sqlalchemy import *
 from kafka import KafkaProducer
 import datetime
 
 
 app = Flask(__name__)
 api = Api(app)
-producer = KafkaProducer(bootstrap_servers='localhost:1234')
+
+def connect(db, host='localhost', port=5432):
+	# We connect with the help of the PostgreSQL URL
+    # postgresql://federer:grandestslam@localhost:5432/tennis
+    url = 'postgresql://{}:{}/{}'
+    url = url.format(host, port, db)
+
+    con = sqlalchemy.create_engine(url, client_encoding='utf8')
+    meta = sqlalchemy.MetaData(bind=con, reflect=True)
+
+    return con, meta
+
+class AuthenticateUser(Resource):
+    def post(self):
+        try:
+            # Parse the arguments
+            con, meta = connect('beaker')
+            
+            parser = reqparse.RequestParser()
+            parser.add_argument('username', type=str, help='Username for Authentication')
+            parser.add_argument('password', type=str, help='Password for Authentication')
+            args = parser.parse_args()
+
+            _userUsername = args['username']
+            _userPassword = args['password']
+
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            #Could try string formatting for statement execute
+            #Check for username AND password match in user table
+            stmt = "SELECT * FROM user WHERE Username='{}' AND Password='{}'".format(_userUsername,_userPassword)
+            cursor.execute(stmt)
+            data = cursor.fetchall()
+
+            if(len(data)>0):
+                if(data):
+                    #Format return into JSON object
+                    userData = {'username': data[0][0], 'userType': data[0][2]}
+                    js = json.dumps(userData)
+                    resp = Response(js, status=200, mimetype='application/json')
+                    return resp
+                else:
+                    return {'status':100,'message':'Authentication failure'}
+
+        except Exception as e:
+            return {'error': str(e)}
+
 
 
 @app.after_request
