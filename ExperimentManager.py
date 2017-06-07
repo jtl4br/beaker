@@ -16,7 +16,7 @@ sched = BackgroundScheduler()
 sched.start()
 print 'b'
 
-consumer = KafkaConsumer('beakertopic')
+consumer = KafkaConsumer('experiments')
 while True:
 	for msg in consumer:
 		data = json.loads(msg.value)
@@ -34,4 +34,11 @@ while True:
 			print 'ERROR'
 			sched.add_job(executeExperimentJob, 'interval', seconds=3)
 
+def manageExperiment
 
+consume = KafkaConsumer('newData')
+def manageData():
+	for msg in consumer
+		data = json.loads(msg.value)
+		if data['target'] == '':
+		
