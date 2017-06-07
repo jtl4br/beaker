@@ -117,7 +117,6 @@ class Experiment(Resource):
 
 		return data
 
-
 	# Gets the configuration of an experiment
 	def get(self):
 		producer.send(KAFKA_TOPIC, {'type' : 'this is a test of the GT emergency system'})
