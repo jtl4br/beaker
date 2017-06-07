@@ -15,16 +15,29 @@ if __name__ == "__main__":
 class Experiment(Resource):
 	# Adds a new experiment
 	def post(self):
+		parser = reqparse.RequestParser()
+	    parser.add_argument('name', type=str, help='Exp Name')
+        parser.add_argument('target', type=str, help='product or feature we are collecting from')
+		args = parser.parse_args()
+
+        _courseNum = args['name']
+        _courseName = args['target']
+        _courseInstructor = args['instructor']
 
 	# Gets the configuration of an experiment
 	def get(self):
 
-
+	# Deletes an experiment from the database
 	def delete(self):
 
+class AddMetricToExperiment(Resource):
+	# Adds a new metric to an existing experiment
+	def put(self):
 
 class StartExperiment(Resource):
+	# Triggers it to start collecting data
 	def put(self):
 
 class PauseExperiment(Resource):
+	# Temporarily stops data collection
 	def put(self):
