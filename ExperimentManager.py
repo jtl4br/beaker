@@ -8,9 +8,8 @@ import json
 producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 KAFKA_TOPIC = 'beakertopic'
 
-def executeExperimentJob(a):
-
-
+def executeExperimentJob():
+	print 'AAAA'
 
 
 sched = BackgroundScheduler()
@@ -22,9 +21,17 @@ while True:
 	for msg in consumer:
 		data = json.loads(msg.value)
 		if data['type'] == 'AddExperiment':
-			sched.add_job(executeExperimentJob, 'interval', )
-		elif data['type'] == 'foo':
+			# Adds a new job to the scheduler
+			# sched.add_job(executeExperimentJob, 'interval', seconds=3, start_date=data['startDate'], end_date=data['endDate'])
+			print 'A'	
+		elif data['type'] == 'DeleteExperiment':
+			# Removes job from scheduler
 			print 'B'
-		else:
+		elif data['type'] == 'UpdateExperiment':
+			# Deletes the experiment and adds in a new one with the same id 
 			print 'C'
+		else:
+			print 'ERROR'
+			sched.add_job(executeExperimentJob, 'interval', seconds=3)
+
 
