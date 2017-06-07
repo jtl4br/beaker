@@ -6,39 +6,58 @@ import json
 
 
 producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-KAFKA_TOPIC = 'beakertopic'
-
-def executeExperimentJob():
-	print 'AAAA'
-
-
 sched = BackgroundScheduler()
 sched.start()
-print 'b'
 
-consumer = KafkaConsumer('experiments')
-while True:
+def runExperiment(experiment):
+	
+
+customerConsumer = KafkaConsumer('AddExperiment')
+def manageAddExperiment():
 	for msg in consumer:
-		data = json.loads(msg.value)
-		if data['type'] == 'AddExperiment':
-			# Adds a new job to the scheduler
-			# sched.add_job(executeExperimentJob, 'interval', seconds=3, start_date=data['startDate'], end_date=data['endDate'])
-			print 'A'	
-		elif data['type'] == 'DeleteExperiment':
-			# Removes job from scheduler
-			print 'B'
-		elif data['type'] == 'UpdateExperiment':
-			# Deletes the experiment and adds in a new one with the same id 
-			print 'C'
-		else:
-			print 'ERROR'
-			sched.add_job(executeExperimentJob, 'interval', seconds=3)
+		print msg.value
 
-def manageExperiment
+customerConsumer = KafkaConsumer('ResumeExperiment')
+def manageDeleteExperiment():
+	for msg in consumer:
+		print msg.value
 
-consume = KafkaConsumer('newData')
-def manageData():
-	for msg in consumer
-		data = json.loads(msg.value)
-		if data['target'] == '':
-		
+customerConsumer = KafkaConsumer('PauseExperiment')
+def manageDeleteExperiment():
+	for msg in consumer:
+		print msg.value
+
+customerConsumer = KafkaConsumer('DeleteExperiment')
+def manageDeleteExperiment():
+	for msg in consumer:
+		print msg.value
+
+customerConsumer = KafkaConsumer('UpdateExperiment')
+def manageUpdateExperiment():
+	for msg in consumer:
+		print msg.value
+
+customerConsumer = KafkaConsumer('NewCustomerData')
+def manageNewCustomerData():
+	for msg in consumer:
+		print msg.value
+	    con, meta = connect('beaker')
+	    beaker = Table('customer', meta, autoload=True)
+	    i = beaker.insert()
+	    i.execute(name=_name,card_type=cardType,region=_region,income=_income,age=_age,prev_num_card=previousNumCreditCards)
+
+transactionConsumer = KafkaConsumer('NewTransactionData') 
+def manageNewTransactionData():
+	for msg in consumer:
+		print msg.value
+		con, meta = connect('beaker')
+	    beaker = Table('transactions', meta, autoload=True)
+	    i = beaker.insert()
+	    i.execute(name=_name,card_type=cardType,transaction_type=transactionType,income=_income,region=_region,age=_age,prev_num_card=previousNumCreditCards,balance=_balance,max_limit=_limit,amount=_amount)
+
+sched.add_job(manageNewCustomerData, 'interval', seconds=5)
+sched.add_job(manageNewTransactionData, 'interval', seconds=5)
+sched.add_job(manageNewTransactionData, 'interval', seconds=5)
+sched.add_job(manageNewTransactionData, 'interval', seconds=5)
+
+
