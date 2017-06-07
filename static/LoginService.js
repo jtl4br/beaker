@@ -21,7 +21,7 @@ angular.module('myApp').factory('LoginService',
         //See above on deffereds for async code
 
         //Post request to server
-        return $http.post('/app/AuthenticateUser', {username: username, password: password})
+        return $http.post('/api/AuthenticateUser', {username: username, password: password})
         .success(function(data) {
             user = data.username;
             isLoggedIn = true;
