@@ -1,5 +1,7 @@
 from flask import Flask, Response, json, send_file, render_template, request, jsonify, make_response, session, redirect, url_for
 from flask_restful import Resource, Api, reqparse
+# from sqlalchemy i  mport create_engine
+import sqlalchemy
 from sqlalchemy import *
 from kafka import KafkaProducer
 import datetime
@@ -10,20 +12,28 @@ api = Api(app)
 
 def connect(db, host='localhost', port=5432):
 	# We connect with the help of the PostgreSQL URL
-    # postgresql://federer:grandestslam@localhost:5432/tennis
+    # postgresql://user:passlocalhost:5432/database
+    print 'Connecting...'
     url = 'postgresql://{}:{}/{}'
     url = url.format(host, port, db)
+    print url
 
     con = sqlalchemy.create_engine(url, client_encoding='utf8')
+    print 'con'
     meta = sqlalchemy.MetaData(bind=con, reflect=True)
-
+    print 'meta'
+    print con
+    print meta
     return con, meta
 
 class AuthenticateUser(Resource):
     def post(self):
+    	print 'authenticating...'
         try:
             # Parse the arguments
             con, meta = connect('beaker')
+            print con
+            print meta
             
             parser = reqparse.RequestParser()
             parser.add_argument('username', type=str, help='Username for Authentication')
@@ -38,6 +48,7 @@ class AuthenticateUser(Resource):
 
             users = Table('users', meta, autoload=True)
             data = users.select(and_(users.username == _userUsername, users.password == _userPassword)).execute()
+            print data
 
             if(len(data)>0):
                 if(data):
@@ -129,8 +140,8 @@ class Experiment(Resource):
 	def delete(self):
 		return 0
 
-#api.add_resource(AuthenticateUser, '/api/AuthenticateUser')
-api.add_resource(Experiment, '/api/Experiment')
+api.add_resource(AuthenticateUser, '/api/AuthenticateUser')
+# api.add_resource(Experiment, '/api/Experiment')
 # api.add_resource(AddExperiment, '/api/AddExperiment')
 
 
