@@ -3,7 +3,7 @@ from flask_restful import Resource, Api, reqparse
 from sqlalchemy import *
 from kafka import KafkaProducer
 import datetime
-
+import json
 
 app = Flask(__name__)
 api = Api(app)
@@ -56,6 +56,9 @@ class AuthenticateUser(Resource):
 
 
 
+producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+KAFKA_TOPIC = 'beakertopic'
+
 @app.after_request
 def add_header(r):
     """
@@ -72,28 +75,13 @@ def add_header(r):
 def login():
     #if 'username' in session:
         #return redirect('/dashboard')
-    return render_template('login.html')
+    return render_template('./static/partials/login.html')
 
 #@app.route("/")
 #def hello():
 #    return "Login Page"
 
 class Experiment(Resource):
-	# Update an 'experiment'
-	def put(self):
-
-	# Gets the configuration of an experiment
-	def get(self):
-		producer.send('beaker_topic', b'this is a test of the GT emergency system')
-		#api.add_resource(AddExperiment, '/api/AddExperiment')
-
-	# Deletes an experiment from the database
-	def delete(self):
-
-class AddExperiment(Resource):
-	def get(self):
-		return 'hello'
-
 	def post(self):
 		parser = reqparse.RequestParser()
 
@@ -126,10 +114,29 @@ class AddExperiment(Resource):
 
 		# Persist to the local database
 
+		# Persist to Kafka Producer
+		populationData = {'ageGroup': _expAgeGroup, 'geo': _expGeoGroup, 'incomeLevel': _expIncomeLevel}
+		data = {'type': 'AddExperiment', 'name': _expName, 'target': _expTarget, 'startDate': _expStartDate, 'endDate': _expEndDate, 'status': _expShouldCollect, 'population': populationData, 'metrics':expMetrics}
+		producer.send(KAFKA_TOPIC, data)
+
+		return data
+
+
+	# Gets the configuration of an experiment
+	def get(self):
+		producer.send(KAFKA_TOPIC, {'type' : 'this is a test of the GT emergency system'})
+
+	# Update an 'experiment'
+	def put(self):
+		return 0
+
+	# Deletes an experiment from the database
+	def delete(self):
+		return 0
+
 #api.add_resource(AuthenticateUser, '/api/AuthenticateUser')
 api.add_resource(Experiment, '/api/Experiment')
-
-
+# api.add_resource(AddExperiment, '/api/AddExperiment')
 
 
 if __name__ == "__main__":
