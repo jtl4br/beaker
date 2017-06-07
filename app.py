@@ -33,19 +33,15 @@ class AuthenticateUser(Resource):
             _userUsername = args['username']
             _userPassword = args['password']
 
-            conn = mysql.connect()
-            cursor = conn.cursor()
-            #Could try string formatting for statement execute
-            #Check for username AND password match in user table
-            stmt = "SELECT * FROM user WHERE Username='{}' AND Password='{}'".format(_userUsername,_userPassword)
-            cursor.execute(stmt)
-            data = cursor.fetchall()
+            print _userUsername
+            print _userPassword
+
+            users = Table('users', meta, autoload=True)
+            data = users.select(and_(users.username == _userUsername, users.password == _userPassword)).execute()
 
             if(len(data)>0):
                 if(data):
                     #Format return into JSON object
-                    userData = {'username': data[0][0], 'userType': data[0][2]}
-                    js = json.dumps(userData)
                     resp = Response(js, status=200, mimetype='application/json')
                     return resp
                 else:
@@ -75,7 +71,7 @@ def add_header(r):
 def login():
     #if 'username' in session:
         #return redirect('/dashboard')
-    return render_template('./static/partials/login.html')
+    return app.send_static_file('index.html')
 
 #@app.route("/")
 #def hello():
