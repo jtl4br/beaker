@@ -3,7 +3,7 @@ from flask_restful import Resource, Api, reqparse
 # from sqlalchemy i  mport create_engine
 import sqlalchemy
 from sqlalchemy import *
-from kafka import KafkaProducer
+#from kafka import KafkaProducer
 import datetime
 import json
 
@@ -63,8 +63,8 @@ class AuthenticateUser(Resource):
 
 
 
-producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-KAFKA_TOPIC = 'beakertopic'
+#producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+#KAFKA_TOPIC = 'beakertopic'
 
 @app.after_request
 def add_header(r):
@@ -124,13 +124,14 @@ class Experiment(Resource):
 		# Persist to Kafka Producer
 		populationData = {'ageGroup': _expAgeGroup, 'geo': _expGeoGroup, 'incomeLevel': _expIncomeLevel}
 		data = {'type': 'AddExperiment', 'name': _expName, 'target': _expTarget, 'startDate': _expStartDate, 'endDate': _expEndDate, 'status': _expShouldCollect, 'population': populationData, 'metrics':expMetrics}
-		producer.send(KAFKA_TOPIC, data)
+		#producer.send(KAFKA_TOPIC, data)
 
 		return data
 
 	# Gets the configuration of an experiment
 	def get(self):
-		producer.send(KAFKA_TOPIC, {'type' : 'this is a test of the GT emergency system'})
+		#producer.send(KAFKA_TOPIC, {'type' : 'this is a test of the GT emergency system'})
+		return 0
 
 	# Update an 'experiment'
 	def put(self):
