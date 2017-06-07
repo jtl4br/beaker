@@ -1,5 +1,5 @@
 angular.module('myApp').controller('loginController',
-  ['$scope', '$location', 'UserService',
+  ['$scope', '$location', 'LoginService',
   function ($scope, $location, UserService) {
     $scope.username = 'user';
 
@@ -27,9 +27,7 @@ angular.module('myApp').controller('loginController',
           //$location.path('/main');
           if (data) {
             // redirect to main page depending on type
-            if (data.userType == "Student") {
-              $location.path('/main');
-            }
+            $location.path('/main');
             $location
             $scope.loginForm = {};
           } else {

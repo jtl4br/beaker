@@ -1,4 +1,4 @@
-angular.module('myApp').factory('UserService',
+angular.module('myApp').factory('LoginService',
 ['$timeout', '$http', '$q', function ($timeout, $http, $q) {
 
     var user = null;
@@ -32,34 +32,12 @@ angular.module('myApp').factory('UserService',
         });
     }
 
-    function getExperiment(username) {
-        return $http.get('/api/Experiment', {params: {username: username}})
-        .success(function (data) {
-            return data;
-        })
-        .error(function(data,status) {
-            console.error("Get experiment Error", status, data);
-        });
-    }
-
-    function updateExperiment(username, major_name, year) {
-        return $http.put('/api/Student', {username: username, major_name: major_name, year: year})
-        .success(function (data) {
-            return data;
-        })
-        .error(function(data,status) {
-            console.error("Update Student Error", status, data);
-        });
-    }
-
     return ({
         authenticate: authenticate,
         register: register,
         getUser: getUser,
         logout: logout,
-        isLoggedIn: isLoggedIn,
-        getExperiment: getExperiment,
-        updateExperiment: updateExperiment
+        isLoggedIn: isLoggedIn
     });
 }]);
 
