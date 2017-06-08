@@ -290,6 +290,8 @@ class Experiment(Resource):
 
 	# Gets the configuration of an experiment
 	def get(self):
+		con, meta, db = connect('beaker')
+		
 		try:
 			_id = request.args['experimentId']
 			return 0

@@ -1,50 +1,18 @@
 angular.module('myApp').factory('CreateExperimentService',
 ['$timeout', '$http', '$q', function ($timeout, $http, $q) {
 
-    function submit() {
-        return 0;
-    }
-
-    /*
-
-    var user = null;
-    var isLoggedIn = false;
-
-    function getUser() {
-        return user;
-    }
-
-    function logout() {
-        var deferred = $q.defer();
-        user = null;
-        isLoggedIn = false;
-        deferred.resolve("Logged Out");
-        return deferred.promise;
-    }
-
-    function authenticate(username, password) {
-        //http://twisted.readthedocs.io/en/twisted-16.2.0/core/howto/defer-intro.html
-        //See above on deffereds for async code
-
-        //Post request to server
-        return $http.post('/api/AuthenticateUser', {username: username, password: password})
-        .success(function(data) {
-            user = data.username;
-            isLoggedIn = true;
-            return data;
-        })
-        .error(function(data, status) {
-            console.error("Authenticate User Error", status, data);
+    function postExperiment(name, card, target, start_date, end_date, age_l, age_u) {
+        return $http.post('/api/Experiment', 
+            {name:name, card:card, target:target,
+                start_date:start_date,end_date:end_date,
+                age_l:age_l,age_u:age_u}
+            ).then(function(response) {
+            console.log(response)
+            return response;
         });
     }
 
     return ({
-        authenticate: authenticate,
-        register: register,
-        getUser: getUser,
-        logout: logout,
-        isLoggedIn: isLoggedIn
+        postExperiment:postExperiment
     });    
-    */
-
 }]);
