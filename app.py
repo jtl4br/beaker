@@ -87,24 +87,25 @@ def login():
 
 def filter():
 	# Get all query strings
-	expToQueryString = dict()
-	expTable = Table('experiment', meta, autoload=True)
-	s = select([expTable])
-	result = conn.execute(s)
-	for row in result:
-		print row
-		expToQueryString[row[]] = row[]
+	# expToQueryString = dict()
+	# expTable = Table('experiment', meta, autoload=True)
+	# s = select([expTable])
+	# result = conn.execute(s)
+	# for row in result:
+	# 	print row
+	# 	expToQueryString[row[]] = row[]
 	
-	for exp in expToQueryString:
-		query_string = expToQueryString[exp]
+	# for exp in expToQueryString:
+	# 	query_string = expToQueryString[exp]
 
-		from sqlalchemy import text
-		sql = text(query_string)
-		result = db.engine.execute(sql)
+	# 	from sqlalchemy import text
+	# 	sql = text(query_string)
+	# 	result = db.engine.execute(sql)
 
-		for row in result:
-			producer = KafkaProducer()
-			producer.send(exp, str(row))
+	# 	for row in result:
+	# 		producer = KafkaProducer()
+	# 		producer.send(exp, str(row))
+	return 0
 
 
 def updateExperiment(experiment):
@@ -113,7 +114,7 @@ def updateExperiment(experiment):
 	for msg in consumer:
 		data.add(msg)
 
-	for metric in experiment['metrics']
+	for metric in experiment['metrics']:
 		if metric == 'RatioAmountToBalance':
 			m = RatioAmountToBalance(data)
 			ratios = m.calculate()
@@ -177,46 +178,47 @@ class Experiment(Resource):
 
 		_expMetrics = args['metric'] # Returns a list of predefined metrics codenames
 
+		#insert experiment into experiments
+		_expInsertString = []
+		_expInsertString = 'INSERT INTO EXPERIMENTS (NAME,PRODUCT,START_DATE,END_DATE,ACTIVE,TARGET,AGEGROUP,GEOGROUP,INCOMEGROUP) VALUES ('
+		_expInsertString.append(_expName,_expProduct,_expStartDate,_expEndDate,_expActive,_expTarget,_expAgeGroup,_expGeoGroup,_expIncomeLevel)
+		_expInsertString.append(');')
+		('').join(_expInsertString)
+
+		#build table for data
+		if _expTarget == 0:
+			dataTable = Table(_expName+'_data', meta,
+				Column('id', Integer, Sequence(_expName + '_id_seq'), primary_key=True),
+				Column('name', String(30)),
+				Column('card_type', String(20)),
+				Column('region', Integer),
+				Column('age',Integer),
+				Column('prev_num_card', Integer),
+				Column('date', timestamp)
+			)
+		elif _expTarget == 1:
+			dataTable = Table(_expName+'_data', meta,
+				Column('id', Integer, Sequence(_expName + '_id_seq'), primary_key=True),
+				Column('name', String(30)),
+				Column('card_type', String(20)),
+				Column('transaction_type', String(20)),
+				Column('amount', Integer),
+				Column('balance', Integer),
+				Column('max_limit', Integer),
+				Column('region', Integer),
+				Column('age',Integer),
+				Column('income', Integer),
+				Column('date', timestamp)
+			)
+
+		meta.create_all()
+
 		### TODO - build query string
-		_expQueryString = 'SELECT from {}'.format(_expTarget)
-
-		if _expAgeGroup == 0:
-
-		elif _expAgeGroup == 1:
-
-		elif _expAgeGroup == 2:
-
-		elif _expAgeGroup == 3:
-
-		elif _expAgeGroup == 4:
-			
-		else: #all
-
-		if _expAgeGroup == 0:
-
-		elif _expGeoGroup == 1:
-
-		elif _expGeoGroup == 2:
-
-		elif _expGeoGroup == 3:
-
-		elif _expGeoGroup == 4:
-
-		else: #all
-		
-		if _expIncomeLevel == 0:
-
-		elif _expIncomeLevel == 1:
-
-		elif _expIncomeLevel == 2:
-
-		elif _expIncomeLevel == 3:
-
-		elif _expIncomeLevel == 4:
-
-		else: #all
+		# _expQueryString = 'SELECT * from {}'.format(_expName + '_data')
+		# _expQueryString.append()
 
 
+		print _expQueryString
 		# Spin up a new experiment job
 		populationData = {'ageGroup': _expAgeGroup, 'geo': _expGeoGroup, 'incomeLevel': _expIncomeLevel}
 		experiment = {'id': _expId,
@@ -228,7 +230,7 @@ class Experiment(Resource):
 					  'population': populationData, 
 					  'metrics':expMetrics
 					  }
-		sched.add_job(updateExperiment, 'interval'
+		sched.add_job(updateExperiment, 'interval',
 					  kwargs={'experiment':experiment}, 
 					  id=_expId,
 					  start_date=_expStartDate, 
