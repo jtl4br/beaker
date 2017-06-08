@@ -3,7 +3,7 @@ from flask_restful import Resource, Api, reqparse
 # from sqlalchemy i  mport create_engine
 import sqlalchemy
 from sqlalchemy import *
-#from kafka import KafkaProducer
+from kafka import KafkaProducer
 import datetime
 import json
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -12,13 +12,8 @@ import uuid
 app = Flask(__name__)
 api = Api(app)
 
-# startupSavedExperiments()
-
-
-# TODO
-def startupSavedExperiments():
-	# Spin up experiments saved in DB Experiment Table
-	return 0
+sched = BackgroundScheduler()
+sched.start()
 
 def connect(db, host='localhost', port=5432):
 	# We connect with the help of the PostgreSQL URL
@@ -30,9 +25,16 @@ def connect(db, host='localhost', port=5432):
 
 	con = sqlalchemy.create_engine(url, client_encoding='utf8')
 	meta = sqlalchemy.MetaData(bind=con, reflect=True)
-	return con, meta
+	return con, meta, db
 
-con, meta = connect('beaker')
+# TODO
+def startupSavedExperiments():
+	# Spin up experiments saved in DB Experiment Table
+	return 0
+
+
+con, meta, db = connect('beaker')
+#startupSavedExperiments()
 
 class AuthenticateUser(Resource):
 	def post(self):
@@ -63,7 +65,6 @@ class AuthenticateUser(Resource):
 		except Exception as e:
 			return {'error': str(e)}
 
-
 @app.after_request
 def add_header(r):
 	"""
@@ -82,18 +83,51 @@ def login():
 		#return redirect('/dashboard')
 	return app.send_static_file('index.html')
 
-def filter(experiment):
-	return []
 
-def calcMetrics(messages, metrics):
-	# for metric in metrics:
-	return []
+def filter():
+	# Get all query strings
+	expToQueryString = dict()
+	expTable = Table('experiment', meta, autoload=True)
+	s = select([expTable])
+	result = conn.execute(s)
+	for row in result:
+		print row
+		expToQueryString[row[]] = row[]
+	
+	for exp in expToQueryString:
+		query_string = expToQueryString[exp]
+
+		from sqlalchemy import text
+		sql = text(query_string)
+		result = db.engine.execute(sql)
+
+		for row in result:
+			print row
+			producer = KafkaProducer()
+			producer.send(exp, str(row))
+
 
 
 def updateExperiment(experiment):
-	print experiment
-	filtered = filter(experiment)
-	calcMetrics(filtered, experiment['metrics'])
+	consumer = KafkaConsumer(experiment['id'])
+	data = []
+	for msg in consumer:
+		data.add(msg)
+	for metric in experiment['metrics']
+		if metric == 'RatioAmountToBalance':
+			m = RatioAmountToBalance(data)
+			ratios = m.calculate()
+			stat = m.stat(args={'ratios':ratios})
+			print ratio
+			print stat 
+		elif metric == 'NumCustomers':
+			m = NumCustomers(data)
+			ans = m.calculate()
+			stat = m.stat()
+			print ans
+			print stat 
+		else:
+			print 'Error'
 
 def default(obj):
     """Default JSON serializer."""
@@ -107,7 +141,7 @@ def default(obj):
         #     obj.microsecond / 1000
         # )
         # return millis
-        obj = obj.strftime("%Y/%m/%d")
+        obj = obj.strftime("%Y-%m-%d")
     raise TypeError('Not sure how to serialize %s' % (obj,))
 
 class Experiment(Resource):
@@ -143,7 +177,7 @@ class Experiment(Resource):
 		_expGeoGroup = args['geo']
 		_expIncomeLevel = args['incomeLevel']
 
-		_expMetrics = args['metric'] # Returns a lisr of predefined metrics codenames
+		_expMetrics = args['metric'] # Returns a list of predefined metrics codenames
 
 		# Spin up a new experiment job
 		populationData = {'ageGroup': _expAgeGroup, 'geo': _expGeoGroup, 'incomeLevel': _expIncomeLevel}
@@ -154,7 +188,8 @@ class Experiment(Resource):
 					  'endDate': _expEndDate, 
 					  'active': _expActive, 
 					  'population': populationData, 
-					  'metrics':expMetrics}
+					  'metrics':expMetrics
+					  }
 		sched.add_job(updateExperiment, 
 					  'interval', 
 					  kwargs={'experiment':experiment}, 
@@ -196,16 +231,12 @@ class Experiment(Resource):
 			return jsonify([dict(r) for r in result])
 
 
-
-
 	# Update an 'experiment'
 	def put(self):
 		parser.add_argument('experimentId', type=str, required=True, help='experiment id')
-		parser.add_argument('newName', type=str, required=True, help='new name')
 		parser.add_argument('active', type=bool, required=True, help='new active state')
 		
 		job_id = args['experimentId']
-		name = args['newName']
 		active = args['active']
 
 		if active == True:
@@ -213,7 +244,7 @@ class Experiment(Resource):
 		else:
 			sched.pause_job(job_id)
 		
-		# Update DB
+		# TODO: Update DB entry
 
 	# Deletes an experiment from the database
 	def delete(self):
@@ -222,11 +253,10 @@ class Experiment(Resource):
 
 		sched.remove_job(job_id)
 
+
+sched.add_job(filter)
 api.add_resource(AuthenticateUser, '/api/AuthenticateUser')
 api.add_resource(Experiment, '/api/Experiment')
 
 if __name__ == "__main__":
-	sched = BackgroundScheduler()
-	sched.start()
-	startupSavedExperiments()
 	app.run()
