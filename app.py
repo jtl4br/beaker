@@ -8,6 +8,7 @@ import datetime
 import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import uuid
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 api = Api(app)
@@ -86,25 +87,25 @@ def login():
 
 
 def filter():
-	# Get all query strings
-	# expToQueryString = dict()
-	# expTable = Table('experiment', meta, autoload=True)
-	# s = select([expTable])
-	# result = conn.execute(s)
-	# for row in result:
-	# 	print row
-	# 	expToQueryString[row[]] = row[]
+	Get all query strings
+	expToQueryString = dict()
+	expTable = Table('experiments', meta, autoload=True)
+	s = select([expTable])
+	result = conn.execute(s)
+	for row in result:
+		print row
+		expToQueryString[row[]] = row[]
 	
-	# for exp in expToQueryString:
-	# 	query_string = expToQueryString[exp]
+	for exp in expToQueryString:
+		query_string = expToQueryString[exp]
 
-	# 	from sqlalchemy import text
-	# 	sql = text(query_string)
-	# 	result = db.engine.execute(sql)
+		from sqlalchemy import text
+		sql = text(query_string)
+		result = db.engine.execute(sql)
 
-	# 	for row in result:
-	# 		producer = KafkaProducer()
-	# 		producer.send(exp, str(row))
+		for row in result:
+			producer = KafkaProducer()
+			producer.send(exp, str(row))
 	return 0
 
 
@@ -112,19 +113,25 @@ def updateExperiment(experiment):
 	consumer = KafkaConsumer(experiment['id'])
 	data = []
 	for msg in consumer:
-		data.add(msg)
+		data.add(tuple(msg.value))
+	
+	job_id = experiment['id']
 
 	for metric in experiment['metrics']:
 		if metric == 'RatioAmountToBalance':
+
 			m = RatioAmountToBalance(data)
 			ratios = m.calculate()
 			stat = m.stat(args={'ratios':ratios})
-			experimentToMetrics[experiment['id']] = {'value': ratios,'stat': stat}
+			experimentToMetrics[job_id] = {'value': ratios,
+										   'stat': stat}
 		elif metric == 'NumCustomers':
+			
 			m = NumCustomers(data)
 			m.calculate()
 			stat = m.stat()
-			experimentToMetrics[experiment['id']] = {'value': m.numCustomersList,'stat': stat}
+			experimentToMetrics[job_id] = {'value': m.numCustomersList,
+										   'stat': stat}
 		else:
 			print 'Error'
 
@@ -170,8 +177,9 @@ class Experiment(Resource):
 		_expName= args['name']
 		_expProduct = args['product']
 		_expTarget = args['target']
-		_expStartDate = '{} 00:00:00'.format(args['startDate'])
-		_expEndDate = '{} 00:00:00'.format(args['endDate'])
+		
+		_expStartDate = datetime.strptime(_expStartDate , '%Y-%m-%d 00:00:00')
+		_expEndDate = datetime.strptime(_expEndDate , '%Y-%m-%d 00:00:00')
 		_expActive = args['active'] # State for whether the experiment should be collecting or not (pause)
 
 
@@ -236,7 +244,7 @@ class Experiment(Resource):
 		toReturn = result.fetchall()
 
 		print _expQueryString
-		# Spin up a new experilment job
+		# Spin up a new experiment job
 		populationData = {'ageLower': _expAgeLower, 'ageUpper': _expAgeUpper, 'geo': _expGeoGroup, 'incomeLevel': _expIncomeLevel}
 		experiment = {'id': _expId,
 					  'name': _expName, 
@@ -245,7 +253,8 @@ class Experiment(Resource):
 					  'endDate': _expEndDate, 
 					  'active': _expActive, 
 					  'population': populationData, 
-					  'metrics':expMetrics
+					  'metrics':expMetrics,
+					  'queryString':_expQueryString # <---TODO: Add column to database
 					  }
 		sched.add_job(updateExperiment, 'interval',
 					  kwargs={'experiment':experiment}, 
@@ -260,7 +269,8 @@ class Experiment(Resource):
 				  product=_expProduct, target=_expTarget, 
 				  active=_expShouldCollect, start_date=_expEndDate, 
 				  end_date=_expEndDate, ageLower=_expAgeLower, ageUpper=_expAgeUpper,
-				  geogroup=_expGeoGroup, incomegroup = _expIncomeLevel)
+				  geogroup=_expGeoGroup, incomegroup = _expIncomeLevel, 
+				  querystring=_expQueryString)
 		
 		print experiment
 		print job
@@ -310,39 +320,54 @@ class Experiment(Resource):
 
 		sched.remove_job(job_id)
 
+class BasicStat(Resource):
+	def get(self):
+		id = request.args['experimentId']
+		print id
 
-@app.route("/data/basicStats")
-def getBasicStats():
-	id = request.args.get('expId')
-	stat = experimentToMetrics[id]['stat']
-	data = {'mean': stat[0], 'median': stat[1], 'stdDv': stat[2], 'var': stat[3]}
-	return jsonify(data)
+		stat = experimentToMetrics[id]['stat']
+		data = {'mean': stat['mean'], 'median': stat['median'], 'stdDev': stat['stdDev'], 'var': stat['var']}
+		return jsonify(data)
 
-@app.route("/data/pChange")
-def getPChange():
-	id = request.args.get('expId')
-	data = []
-	pChanges = experimentToMetrics[id]['stat'][4]
-	for x in pChanges:
-		date = x[0]
-		pChange = x[1]
-		data.append({'date':date, 'val':pChange})
-	return jsonify(data)
+class PChange(Resource):
+	def get(self):
+		import random
+		id = request.args['experimentId']
+		print id
 
-@app.route("/data/values")
-def getValues():
-	id = request.args.get('expId')
-	data = []
-	values = experimentToMetrics[id]['value']
-	for x in values:
-		date = x[0]
-		val = x[1]
-		data.append({'date':date, 'val':val})
-	return jsonify(data)
+		if id == 'test':
+			data = []
+			for x in range(0, 5):
+				data.append({'date': datetime.now()+timedelta(minutes=x*2), 'val': 20 + random.random() * 100})
+			return jsonify(data)
+		else:
+			data = []
+			pChanges = experimentToMetrics[id]['stat'][4]
+			for x in pChanges:
+				date = x[0]
+				pChange = x[1]
+				data.append({'date':date, 'val':pChange})
+			return Response(jsonify(data), )
+
+class Values(Resource):
+	def get(self):
+		id = request.args['experimentId']
+		print id
+
+		data = []
+		values = experimentToMetrics[id]['value']
+		for x in values:
+			date = x[0]
+			val = x[1]
+			data.append({'date':date, 'val':val})
+		return 'a'
 
 sched.add_job(filter)
 api.add_resource(AuthenticateUser, '/api/AuthenticateUser')
 api.add_resource(Experiment, '/api/Experiment')
+api.add_resource(PChange, '/api/data/pChange')
+api.add_resource(Values, '/api/data/values')
+api.add_resource(BasicStat, '/api/data/basic')
 
 if __name__ == "__main__":
 	app.run()

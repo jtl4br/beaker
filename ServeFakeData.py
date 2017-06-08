@@ -72,6 +72,6 @@ def generateNewTransactionData():
 
 logging.basicConfig()
 sched = BlockingScheduler()
-sched.add_job(generateNewCustomerSignUpData, 'interval', seconds=30)
-sched.add_job(generateNewTransactionData, 'interval', seconds=30)
+sched.add_job(generateNewCustomerSignUpData, 'interval', seconds=10)
+sched.add_job(generateNewTransactionData, 'interval', seconds=10)
 sched.start()

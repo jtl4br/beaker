@@ -34,7 +34,7 @@ class RatioAmountToBalance(Metric):
 			pChange = (x2 - x1)/x1
 			percentChanges.append((self.data[], pChange)) #(date, value)
 
-		return (mean, median, stdDev, var, percentChanges)
+		return {'mean':mean, 'median':median, 'stdDev':stdDev, 'var':var, 'pChanges':percentChanges}
 
 class NumCustomers(Metric):
 	def calculate(self, args):
@@ -58,4 +58,5 @@ class NumCustomers(Metric):
 			pChange = (x2 - x1)/x1
 			percentChanges.append((dates[i+1], pChange)) #(date, value)
 
-		return (mean, median, stdDev, var, percentChanges)
+		return {'mean':mean, 'median':median, 'stdDev':stdDev, 'var':var, 'pChanges':percentChanges}
+
