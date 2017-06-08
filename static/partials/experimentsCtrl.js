@@ -3,8 +3,8 @@ angular.module('myApp').controller('experimentsController',
 	function ($scope, $location, ExperimentsService) {
 		var data = this;
 		data.names = [
-			{title:'Experiment 1'}
-			{title: 'Experiment 2'}
+			{title:'Experiment 1'},
+			{title: 'Experiment 2'},
 			{title: 'Experiment 3'}];
 
 		data.addData = function() {

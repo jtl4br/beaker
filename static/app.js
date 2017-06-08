@@ -1,4 +1,4 @@
-var myApp = angular.module('myApp', ['ngRoute']);
+var myApp = angular.module('myApp',['ngRoute']);
 
 myApp.config(function ($routeProvider) {
     $routeProvider
@@ -11,10 +11,11 @@ myApp.config(function ($routeProvider) {
         templateUrl: 'static/partials/viewAllExperiments.html',
         controller: 'viewAllExperimentsController'
     })
+    .when('/experiments/create', {
+        templateUrl: 'static/partials/createExperiment.html',
+        controller: 'createExperimentController'
+    })
     .otherwise({
         redirectTo: '/'
     });
 })
-.config(['$interpolateProvider', function($interpolateProvider) {
-  $interpolateProvider.startSymbol('//').endSymbol('//');
-}]);
