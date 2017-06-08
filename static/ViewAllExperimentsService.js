@@ -3,7 +3,7 @@ angular.module('myApp').factory('ViewAllExperimentsService',
 
     function getAllExperiments() {
         return $http.get('/api/Experiment').then(function(response) {
-            console.log(response);
+            // console.log(response);
             return response;
         });
     }

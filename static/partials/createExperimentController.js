@@ -1,6 +1,6 @@
 angular.module('myApp').controller('createExperimentController',
 	['$scope', '$location', 'CreateExperimentService',
-	function ($timeout, $scope) {
+	function ($timeout, $scope, CreateExperimentService) {
 
 
 	$scope.values = [
