@@ -1,14 +1,19 @@
 <div class="container-fluid">
-<div class="container jumbotron" align="center" ng-controller="viewAllExperimentsController as data">
+<div class="container jumbotron" align="center">
 	<h1>Experiments</h1>
-	<table ng-repeat="experiment in data.experiments">
+	</br>
+	<table>
+		<tr ng-repeat="exp in data track by $index">
+			<td>
+				<img src="/static/partials/assets/img/experiment_icon.png" ng-click="viewExperiment(exp.id);" style="width:150px;height:150px;"></br>
+				ID: {{exp.id}} </br>
+				Name: {{exp.name}} </br>
+				Product: {{exp.product}} </br>
+				Start Date: {{exp.start_date}} </br>
+				End Date: {{exp.end_date}} </br>
+				Active: {{exp.active}} </br>
+			</td>
 		<tr>
-			<div>
-				<img src="/static/partials/assets/img/experiment_icon.png" style="width:150px;height:150px;">
-				</br>
-				<h3>ID: //experiment.id// </h3>
-			</div>
-		</tr>
 	</table>
 </div>
 </div>

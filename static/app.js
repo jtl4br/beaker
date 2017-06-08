@@ -11,10 +11,11 @@ myApp.config(function ($routeProvider) {
         templateUrl: 'static/partials/viewAllExperiments.html',
         controller: 'viewAllExperimentsController'
     })
+    .when('/view', {
+        templateUrl: 'static/partials/viewExperiment.html',
+        controller: 'viewExperimentController'
+    })
     .otherwise({
         redirectTo: '/'
     });
-})
-.config(['$interpolateProvider', function($interpolateProvider) {
-  $interpolateProvider.startSymbol('//').endSymbol('//');
-}]);
+});
