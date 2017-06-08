@@ -36,28 +36,10 @@ class RatioAmountToBalance(Metric):
 
 		return (mean, median, stdDev, var, percentChanges)
 
-class NumCustomersPastXMonths(Metric):
-	def monthdelta(date, delta):
-	    m, y = (date.month+delta) % 12, date.year + ((date.month)+delta-1) // 12
-	    if not m: m = 12
-	    d = min(date.day, [31,
-	        29 if y%4==0 and not y%400==0 else 28,31,30,31,30,31,31,30,31,30,31][m-1])
-	    return date.replace(day=d,month=m, year=y)
-
-	def calculate(self, args={'numMonths': -1}):
+class NumCustomers(Metric):
+	def calculate(self, args):
 		numMonths = args['numMonths']
-		ans = 0
-		if numMonths == -1:
-			ans = len(data)
-			self.numCustomersList.append(ans)
-		else:
-			num = 0
-			XMonthsDateTime = monthdelta(datetime.now(), -1*numMonths)
-			for d in self.data:
-				if d[] < XMonthsDateTime:
-					num += 1
-			self.numCustomersList.append(num)
-			ans = num
+		ans = len(self.data)
 		return ans
 
 	def stat(self, args=None):
