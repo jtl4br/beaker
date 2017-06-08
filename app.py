@@ -86,13 +86,9 @@ def filter(experiment):
 	return []
 
 def calcMetrics(messages, metrics):
-<<<<<<< Updated upstream
 	# for metric in metrics:
 	return []
-=======
-	for metric in metrics:
-		return []
->>>>>>> Stashed changes
+
 
 def updateExperiment(experiment):
 	print experiment
