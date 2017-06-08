@@ -25,15 +25,11 @@ angular.module('myApp').controller('loginController',
         // handle success
         .then(function (data) {
           //$location.path('/main');
-          console.log(data);
-          console.log(data.data);
           if (data.data) {
             // redirect to main page depending on type
-            console.log("REDIRECTING");
             $location.path('/experiments');
             $scope.loginForm = {};
           } else {
-            console.log("AUTH FAILED");
             $scope.error = true;
             $scope.errorMessage = "Invalid username and/or password";
             $scope.loginForm = {};

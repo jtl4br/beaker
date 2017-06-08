@@ -36,7 +36,7 @@ con, meta = connect('beaker')
 
 class AuthenticateUser(Resource):
 	def post(self):
-		print 'authenticating...'
+		print "Authenticating..."
 		try:
 			# Parse the arguments
 			parser = reqparse.RequestParser()
@@ -93,6 +93,21 @@ def updateExperiment(experiment):
 	print experiment
 	filtered = filter(experiment)
 	calcMetrics(filtered, experiment['metrics'])
+
+def default(obj):
+    """Default JSON serializer."""
+    import calendar, datetime
+
+    if isinstance(obj, datetime.datetime):
+        # if obj.utcoffset() is not None:
+        #     obj = obj - obj.utcoffset()
+        # millis = int(
+        #     calendar.timegm(obj.timetuple()) * 1000 +
+        #     obj.microsecond / 1000
+        # )
+        # return millis
+        obj = obj.strftime("%Y/%m/%d")
+    raise TypeError('Not sure how to serialize %s' % (obj,))
 
 class Experiment(Resource):
 	def post(self):
@@ -161,15 +176,26 @@ class Experiment(Resource):
 
 	# Gets the configuration of an experiment
 	def get(self):
-		parser.add_argument('experimentId', type=str, required=True, help='experiment id')
-		id = args['experimentId']
-		if args['experimentId'] == None: 
-			# Query DB for all experiments
-			print 'all experiments got'
-		else:
+		try:
+			print 'doing al exp'
+			parser = reqparse.RequestParser()
+			parser.add_argument('experimentId', type=str, required=True, help='experiment id')
+			args = parser.parse_args()
+			_id = args['experimentId']
 			print 'one experiment got'
 			# Query DB for specified experiment
-		return 0
+			return 0
+		except Exception as e:
+			print 'getting all experiments'
+			# Query DB for all experiments
+			experiments = Table('experiments', meta, autoload=True)
+			s = select([experiments])
+			result = con.execute(s)
+			print 'all experiments got'
+			for row in result:
+				print row
+ 			return json.dumps([dict(r) for r in result],default=default)
+
 
 
 	# Update an 'experiment'
