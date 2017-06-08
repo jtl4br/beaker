@@ -3,7 +3,7 @@ from flask_restful import Resource, Api, reqparse
 # from sqlalchemy i  mport create_engine
 import sqlalchemy
 from sqlalchemy import *
-from kafka import KafkaProducer
+#from kafka import KafkaProducer
 import datetime
 import json
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -167,7 +167,6 @@ class Experiment(Resource):
 		
 		return experiment
 
-
 	# Gets the configuration of an experiment
 	def get(self):
 		parser.add_argument('experimentId', type=str, required=True, help='experiment id')
@@ -178,6 +177,7 @@ class Experiment(Resource):
 			# Query DB for specified experiment
 
 		return 0
+
 
 	# Update an 'experiment'
 	def put(self):
