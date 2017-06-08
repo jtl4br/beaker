@@ -54,6 +54,7 @@ def manageAddNewExperiment():
 	for msg in c1:
 		sched.add_job(runExperiment, 'interval', seconds=5, start_date='', end_date='')
 
+
 c2 = KafkaConsumer('ResumeExperiment')
 def manageResumeExperiment():
 	for msg in c2:
@@ -64,6 +65,15 @@ def managePauseExperiment():
 	for msg in c3:
 		print msg.value
 
+c4 = KafkaConsumer('DeleteExperiment')
+def manageDeleteExperiment():
+	for msg in c4:
+		print msg.value
+
+c5 = KafkaConsumer('UpdateExperiment')
+def manageUpdateExperiment():
+	for msg in c5:
+		print msg.value
 
 sched.add_job(manageAddNewExperiment, 'interval', seconds=5)
 sched.add_job(manageResumeExperiment, 'interval', seconds=5)

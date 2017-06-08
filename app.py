@@ -20,14 +20,13 @@ sched.start()
 def connect(db, host='localhost', port=5432):
 	# We connect with the help of the PostgreSQL URL
 	# postgresql://user:passlocalhost:5432/database
-	print 'Connecting...'
 	url = 'postgresql://{}:{}/{}'
 	url = url.format(host, port, db)
-	print url
 
 	con = sqlalchemy.create_engine(url, client_encoding='utf8')
 	meta = sqlalchemy.MetaData(bind=con, reflect=True)
 	return con, meta, db
+
 
 # TODO
 def startupSavedExperiments():
@@ -85,25 +84,23 @@ def login():
 
 
 def filter():
-	# Get all query strings
-	print 'filtering'
+	con, meta, db = connect('beaker')
 	expToQueryString = dict()
 	con, meta, db = connect('beaker')
 	expTable = Table('experiments', meta, autoload=True)
 	s = select([expTable])
 	result = con.execute(s)
+
 	for row in result:
-		expToQueryString[row[10]] = row[10]
+		expToQueryString[row[0]] = row[10]
 	
 	for exp in expToQueryString:
-		query_string = expToQueryString[exp]
+		_expQueryString = expToQueryString[exp]
+		result = con.execute(_expQueryString)
 
-		from sqlalchemy import text
-		sql = text(query_string)
-		result = db.engine.execute(sql)
-
-		for row in result:
+		for row in result.fetchall():
 			producer = KafkaProducer()
+			print 'Sending to topic={} with data={}'.format(exp, row)
 			producer.send(exp, str(row))
 	return 0
 
@@ -112,32 +109,41 @@ def updateExperiment(experiment):
 	con, meta, db = connect('beaker')
 	job_id = experiment['id']
 	consumer = KafkaConsumer(job_id)
-
-	print job_id
-	print consumer
 	
 	data = []
+	maxDate = experiment['startDate']
 	for msg in consumer:
-		data.add(tuple(msg.value))
-	
+		data.append(tuple(msg.value))
 
+	data2=[]
+	for entry in data:
+		if entry[10] >= maxDate:
+			data2.append(entry)
+			print 'New Entry: ', entry
+	
 	for metric in experiment['metrics']:
 		if metric == 'RatioAmountToBalance':
-
-			m = RatioAmountToBalance(data)
+			m = RatioAmountToBalance(data2)
 			ratios = m.calculate()
 			stat = m.stat(args={'ratios':ratios})
 			experimentToMetrics[job_id] = {'value': ratios,
 										   'stat': stat}
+			print ratios
+			print stat
 		elif metric == 'NumCustomers':
-			
-			m = NumCustomers(data)
+			m = NumCustomers(data2)
 			m.calculate()
 			stat = m.stat()
 			experimentToMetrics[job_id] = {'value': m.numCustomersList,
 										   'stat': stat}
+			print ratios
+			print stat 
 		else:
 			print 'Error'
+	
+	for d in data:
+		maxDate = max(maxDate, d[10])
+		print 'MaxDate: ', maxDate
 
 def default(obj):
     """Default JSON serializer."""
@@ -272,11 +278,11 @@ class Experiment(Resource):
 					  'queryString':_expQueryString # <---TODO: Add column to database
 					  }
 		
-		# sched.add_job(updateExperiment, 'interval',
-		# 			  kwargs={'experiment':experiment}, 
-		# 			  id=_expId,
-		# 			  start_date=_expStartDate, 
-		# 			  end_date=_expEndDate)
+		sched.add_job(updateExperiment, 'interval',
+					  kwargs={'experiment':experiment}, 
+					  id=_expId,
+					  start_date=_expStartDate, 
+					  end_date=_expEndDate)
 
 		# Persist to the local database
 		expTable = Table('experiments', meta, autoload=True)
@@ -291,7 +297,6 @@ class Experiment(Resource):
 	# Gets the configuration of an experiment
 	def get(self):
 		con, meta, db = connect('beaker')
-		
 		try:
 			_id = request.args['experimentId']
 			return 0
@@ -368,7 +373,7 @@ class Values(Resource):
 
 import logging
 logging.basicConfig()
-# sched.add_job(filter)
+sched.add_job(filter, 'interval', seconds=1)
 api.add_resource(AuthenticateUser, '/api/AuthenticateUser')
 api.add_resource(Experiment, '/api/Experiment')
 api.add_resource(PChange, '/api/data/pChange')

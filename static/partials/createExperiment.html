@@ -3,7 +3,7 @@
     <div class="jumbotron">
         <h1 class="display-3"> Create Experiment </h1>
         <!-- <div ng-show="error" class="alert alert-danger">//errorMessage//</div> -->
-        <form id="createExperimentForm">
+        <div id="createExperimentForm">
             <div class="form-group">
                 <h7> Name </h7>
                 <input id="name" class="form-control" type="text" name="name" ng-model="createExperimentForm.name" placeholder="Name">
@@ -89,8 +89,11 @@
             <br> -->
 
             <button class="btn btn-primary" ng-click="postExperiment()">Submit</button>
-        
+            <button>test</button>
 
-        </form>
+
+        </div>
+
+        {{test}}
     </div>
 </div>

@@ -1,8 +1,8 @@
 angular.module('myApp').controller('createExperimentController',
 	['$scope', '$location', 'CreateExperimentService',
-	function ($timeout, $scope) {
+	function ($timeout, $scope, CreateExperimentService) {
 
-
+		$scope.test = 'hi';
 	$scope.values = [
 	{id: '0', title:"New Customer"},
 	{id: '1', title: "Transactions"}
@@ -11,7 +11,7 @@ angular.module('myApp').controller('createExperimentController',
 	$scope.selectedTarget = 0;
 	
 	$scope.postExperiment = function() {
-
+		console.log('test');
 		CreateExperimentService.postExperiment(
 			$scope.createExperimentForm.name,
 			$scope.createExperimentForm.card,
