@@ -11,7 +11,7 @@ from faker import Factory
 import logging
 fake = Factory.create()
 
-# producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 def connect(db, host='localhost', port=5432):
     # We connect with the help of the PostgreSQL URL
@@ -37,16 +37,8 @@ def generateNewCustomerSignUpData():
     _previousNumCreditCards = random.randint(0,10)
     _date = str(datetime.datetime.now())
 
-    # data = {'id':_id, 'cardType':_cardType, 'date':_date, 'name': _name, 'region': _region, 'income': _income, 'age': '_age', 'previousNumCreditCards': _previousNumCreditCards}
-    
-    # if _cardType == 0:
-    #     producer.send('C1', data)
-    # elif _cardType == 1:
-    #     producer.send('C2', data)
-    # elif _cardType == 2:
-    #     producer.send('C3', data)
-    # else:
-    #     print 'Throw error boyyyy'
+    data = {'id':_id, 'cardType':_cardType, 'date':_date, 'name': _name, 'region': _region, 'income': _income, 'age': '_age', 'previousNumCreditCards': _previousNumCreditCards}
+    producer.send('main', data)
 
     beaker = Table('customer', meta, autoload=True)
     i = beaker.insert()
@@ -68,16 +60,8 @@ def generateNewTransactionData():
     _previousNumCreditCards = random.randint(0,10)
     _date = str(datetime.datetime.now())
 
-    # data = {'id':_id, 'date':_date, 'cardType':_cardType, 'transactionType':_transactionType, 'name': _name, 'amount': _amount, 'balance':_balance, 'limit':_limit, 'region': _region, 'income': _income, 'age': _age, 'previousNumCreditCards': _previousNumCreditCards}
-    
-    # if _cardType == 0:
-    #     producer.send('C4', data)
-    # elif _cardType == 1:
-    #     producer.send('C5', data)
-    # elif _cardType == 2:
-    #     producer.send('C6', data)
-    # else:
-    #     print 'Throw error boyyyy'
+    data = {'id':_id, 'date':_date, 'cardType':_cardType, 'transactionType':_transactionType, 'name': _name, 'amount': _amount, 'balance':_balance, 'limit':_limit, 'region': _region, 'income': _income, 'age': _age, 'previousNumCreditCards': _previousNumCreditCards}
+    producer.send('main', data)
 
     table = Table('transactions', meta, autoload=True)
     i = table.insert()
@@ -88,6 +72,6 @@ def generateNewTransactionData():
 
 logging.basicConfig()
 sched = BlockingScheduler()
-sched.add_job(generateNewCustomerSignUpData, 'interval', seconds=10)
-sched.add_job(generateNewTransactionData, 'interval', seconds=10)
+sched.add_job(generateNewCustomerSignUpData, 'interval', seconds=30)
+sched.add_job(generateNewTransactionData, 'interval', seconds=30)
 sched.start()
