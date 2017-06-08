@@ -266,9 +266,8 @@ class Experiment(Resource):
 			s = select([experiments])
 			result = con.execute(s)
 			print 'all experiments got'
-			for row in result:
-				print row
- 			return json.dumps([dict(r) for r in result],default=default)
+			return jsonify([dict(r) for r in result])
+
 
 	# Update an 'experiment'
 	def put(self):
