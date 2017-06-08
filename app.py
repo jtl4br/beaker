@@ -11,9 +11,9 @@ import uuid
 
 app = Flask(__name__)
 api = Api(app)
-sched = BackgroundScheduler()
-sched.start()
+
 # startupSavedExperiments()
+
 
 # TODO
 def startupSavedExperiments():
@@ -86,8 +86,13 @@ def filter(experiment):
 	return []
 
 def calcMetrics(messages, metrics):
+<<<<<<< Updated upstream
 	# for metric in metrics:
 	return []
+=======
+	for metric in metrics:
+		return []
+>>>>>>> Stashed changes
 
 def updateExperiment(experiment):
 	print experiment
@@ -200,4 +205,7 @@ api.add_resource(AuthenticateUser, '/api/AuthenticateUser')
 api.add_resource(Experiment, '/api/Experiment')
 
 if __name__ == "__main__":
+	sched = BackgroundScheduler()
+	sched.start()
+	startupSavedExperiments()
 	app.run()
