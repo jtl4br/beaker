@@ -94,7 +94,54 @@
             </div>
             <br>
 
-            <button id="next-btn" class="btn btn-primary" ng-click="next()">Next</button>
+            <div class="form-group">
+                <table>
+                    <tr>
+                        <td><h5>Age Range: &nbsp;</h5></td>
+                        <td><input type="number" name=ageRangeStart> &nbsp; to &nbsp; </td>
+                        <td><input type="number" name=ageRangeEnd></td>
+                    </tr>
+                </table>
+            </div>
+             <br>
+
+            <div class="form-group">
+                <h7> Geographic Region(s):</h7>
+                <table>
+                    <tr>
+                        <td><input type=checkbox value="NorthEast" id=NECheckbox> &nbsp;NorthEast &nbsp;</td>
+                        <td><input type=checkbox value="SouthEast" id=SECheckbox> &nbsp;SouthEast &nbsp;</td>
+                        <td><input type=checkbox value="MidWest" id=MWCheckbox> &nbsp;MidWest &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td><input type=checkbox value="NorthWest" id=NWCheckbox> &nbsp;NorthWest &nbsp;</td>
+                        <td><input type=checkbox value="SouthWest" id=SWCheckbox>&nbsp; SouthWest &nbsp; </td>
+                    </tr>
+                </table>
+            </div>
+            <br>
+
+            <div class="form-group">
+                <h7> Income Bracket(s):</h7>
+                <table>
+                    <tr>
+                        <td><input type=checkbox value="$0 - $9,275" id=iOne> &nbsp;$0 - $9,275 &nbsp;</td>
+                        <td><input type=checkbox value="$9,275 - $37,650" id=iTwo> &nbsp; $9,275 - $37,650 &nbsp;</td>
+                        <td><input type=checkbox value="$37,650 - $91,150" id=iThree>&nbsp; $37,650 - $91,150 &nbsp;</td>
+                        <td><input type=checkbox value="$91,150 - $190,150" id=iFour> &nbsp;$91,150 - $190,150 &nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td><input type=checkbox value="$190,150 - $413,350" id=iFive> &nbsp;$190,150 - $413,350 &nbsp;</td>
+                        <td><input type=checkbox value="$413,350 - $415,050" id=iSix> &nbsp;$413,350 - $415,050 &nbsp;</td>
+                        <td><input type=checkbox value="$415,050 and above" id=iSeven> &nbsp;$415,050 and above &nbsp;</td>
+                    </tr>
+                </table>
+            </div>
+            <br>
+
+            <button id="next-btn" class="btn btn-primary" ng-click="submit()">Submit</button>
+        
+
         </form>
     </div>
 </div>

@@ -1,7 +1,7 @@
 angular.module('myApp').factory('CreateExperimentService',
 ['$timeout', '$http', '$q', function ($timeout, $http, $q) {
 
-    function next() {
+    function submit() {
         return 0;
     }
 
