@@ -11,10 +11,10 @@ import uuid
 
 app = Flask(__name__)
 api = Api(app)
+
 sched = BackgroundScheduler()
 sched.start()
 
-metric1 = 
 def connect(db, host='localhost', port=5432):
 	# We connect with the help of the PostgreSQL URL
 	# postgresql://user:passlocalhost:5432/database
@@ -38,7 +38,7 @@ con, meta, db = connect('beaker')
 
 class AuthenticateUser(Resource):
 	def post(self):
-		print 'authenticating...'
+		print "Authenticating..."
 		try:
 			# Parse the arguments
 			parser = reqparse.RequestParser()
@@ -49,26 +49,18 @@ class AuthenticateUser(Resource):
 			_userUsername = args['username']
 			_userPassword = args['password']
 
-			print _userUsername
-			print _userPassword
-
 			if _userUsername is None or _userPassword is None:
-				raise Exception('Username and password required')
+				return False;
 			users = Table('users', meta, autoload=True)
 
 			s = sqlalchemy.select([users]).where(users.c.username == _userUsername).where(users.c.password == _userPassword)
 
 			data = con.execute(s)
 			row = data.fetchone()
-			print row
 
 			if (row is not None):
-				print 'GOOD'
-				resp = Response(js, status=200, mimetype='application/json')
-				return resp
-			else:
-				print 'BAD'
-				return Response(js, status=100, mimetype='application/json')
+				return True;
+			return False;
 
 		except Exception as e:
 			return {'error': str(e)}
@@ -90,6 +82,7 @@ def login():
 	#if 'username' in session:
 		#return redirect('/dashboard')
 	return app.send_static_file('index.html')
+
 
 def filter():
 	# Get all query strings
@@ -113,6 +106,8 @@ def filter():
 			producer = KafkaProducer()
 			producer.send(exp, str(row))
 
+
+
 def updateExperiment(experiment):
 	consumer = KafkaConsumer(experiment['id'])
 	data = []
@@ -130,6 +125,21 @@ def updateExperiment(experiment):
 
 		else:
 			print 'Error'
+
+def default(obj):
+    """Default JSON serializer."""
+    import calendar, datetime
+
+    if isinstance(obj, datetime.datetime):
+        # if obj.utcoffset() is not None:
+        #     obj = obj - obj.utcoffset()
+        # millis = int(
+        #     calendar.timegm(obj.timetuple()) * 1000 +
+        #     obj.microsecond / 1000
+        # )
+        # return millis
+        obj = obj.strftime("%Y/%m/%d")
+    raise TypeError('Not sure how to serialize %s' % (obj,))
 
 class Experiment(Resource):
 	def post(self):
@@ -199,14 +209,25 @@ class Experiment(Resource):
 
 	# Gets the configuration of an experiment
 	def get(self):
-		parser.add_argument('experimentId', type=str, required=True, help='experiment id')
-		id = args['experimentId']
-		# if args['experimentId'] == None: 
-		# 	# Query DB for all experiments
-		# else:
-		# 	# Query DB for specified experiment
-
-		return 0
+		try:
+			print 'doing al exp'
+			parser = reqparse.RequestParser()
+			parser.add_argument('experimentId', type=str, required=True, help='experiment id')
+			args = parser.parse_args()
+			_id = args['experimentId']
+			print 'one experiment got'
+			# Query DB for specified experiment
+			return 0
+		except Exception as e:
+			print 'getting all experiments'
+			# Query DB for all experiments
+			experiments = Table('experiments', meta, autoload=True)
+			s = select([experiments])
+			result = con.execute(s)
+			print 'all experiments got'
+			for row in result:
+				print row
+ 			return json.dumps([dict(r) for r in result],default=default)
 
 	# Update an 'experiment'
 	def put(self):
@@ -232,9 +253,10 @@ class Experiment(Resource):
 
 		sched.remove_job(job_id)
 
+
 sched.add_job(filter)
-api.add_resource(AuthenticateUser, '/api/v1/AuthenticateUser')
-api.add_resource(Experiment, '/api/v1/Experiment')
+api.add_resource(AuthenticateUser, '/api/AuthenticateUser')
+api.add_resource(Experiment, '/api/Experiment')
 
 if __name__ == "__main__":
 	app.run()

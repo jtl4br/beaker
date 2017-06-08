@@ -23,9 +23,9 @@ angular.module('myApp').controller('loginController',
       // call login from service
       LoginService.authenticate($scope.loginForm.username, $scope.loginForm.password)
         // handle success
-        .success(function (data) {
+        .then(function (data) {
           //$location.path('/main');
-          if (data) {
+          if (data.data) {
             // redirect to main page depending on type
             $location.path('/experiments');
             $scope.loginForm = {};
