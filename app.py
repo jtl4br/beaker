@@ -156,7 +156,9 @@ class Experiment(Resource):
 		parser.add_argument('active', type=bool, required=True, help='')
 		
 		# Population Category (default should be 'all')
-		parser.add_argument('ageGroup', type=int, required=True, help='age category')
+		parser.add_argument('ageLower', type=int, required=True, help='age category')
+		parser.add_argument('ageUpper', type=int, required=True, help='age category')
+
 		parser.add_argument('geo', type=int, required=True, help='geographic category')
 		parser.add_argument('incomeLevel', type=int, required=True, help='income category')
 		
@@ -172,7 +174,10 @@ class Experiment(Resource):
 		_expEndDate = '{} 00:00:00'.format(args['endDate'])
 		_expActive = args['active'] # State for whether the experiment should be collecting or not (pause)
 
-		_expAgeGroup = args['ageGroup']
+
+		_expAgeLower = args['ageLower']
+		_expAgeUpper = args['ageUpper']
+
 		_expGeoGroup = args['geo']
 		_expIncomeLevel = args['incomeLevel']
 
@@ -180,8 +185,8 @@ class Experiment(Resource):
 
 		#insert experiment into experiments
 		_expInsertString = []
-		_expInsertString = 'INSERT INTO EXPERIMENTS (NAME,PRODUCT,START_DATE,END_DATE,ACTIVE,TARGET,AGEGROUP,GEOGROUP,INCOMEGROUP) VALUES ('
-		_expInsertString.append(_expName,_expProduct,_expStartDate,_expEndDate,_expActive,_expTarget,_expAgeGroup,_expGeoGroup,_expIncomeLevel)
+		_expInsertString.append('INSERT INTO EXPERIMENTS (NAME,PRODUCT,START_DATE,END_DATE,ACTIVE,TARGET,AGE_L,AGE_U,GEOGROUP,INCOMEGROUP) VALUES (')
+		_expInsertString.append(_expName,_expProduct,_expStartDate,_expEndDate,_expActive,_expTarget,_expAgeLower,_expAgeUpper,_expGeoGroup,_expIncomeLevel)
 		_expInsertString.append(');')
 		('').join(_expInsertString)
 
@@ -214,13 +219,25 @@ class Experiment(Resource):
 		meta.create_all()
 
 		### TODO - build query string
-		# _expQueryString = 'SELECT * from {}'.format(_expName + '_data')
-		# _expQueryString.append()
+		_expQueryString = []
+		_expQueryString.append('SELECT * from {} '.format(_expName + '_data'))
+		_expQueryString.append('WHERE card_type = {} '.format(_expProduct))
+		_expQueryString.append('AND date BETWEEN {} AND {} '.format(_expStartDate,_expEndDate))
+		_expQueryString.append('AND age BETWEEN {} AND {} '.format(_expAgeLower,_expAgeUpper))
 
+		#add region/income maybe
+		_expQueryString.append('AND region IN {} '.format(_expGeoGroup))
+		_expQueryString.append('AND income IN {}'.format(_expIncomeLevel))
+
+		_expQueryString.append(');')
+		('').join(_expQueryString)
+
+		result = con.execute(_expQueryString)
+		toReturn = result.fetchall()
 
 		print _expQueryString
-		# Spin up a new experiment job
-		populationData = {'ageGroup': _expAgeGroup, 'geo': _expGeoGroup, 'incomeLevel': _expIncomeLevel}
+		# Spin up a new experilment job
+		populationData = {'ageLower': _expAgeLower, 'ageUpper': _expAgeUpper, 'geo': _expGeoGroup, 'incomeLevel': _expIncomeLevel}
 		experiment = {'id': _expId,
 					  'name': _expName, 
 					  'target': _expTarget, 
@@ -242,7 +259,7 @@ class Experiment(Resource):
 		i.execute(id=_expId, name=_expName, 
 				  product=_expProduct, target=_expTarget, 
 				  active=_expShouldCollect, start_date=_expEndDate, 
-				  end_date=_expEndDate, agegroup=_expAgeGroup,
+				  end_date=_expEndDate, ageLower=_expAgeLower, ageUpper=_expAgeUpper,
 				  geogroup=_expGeoGroup, incomegroup = _expIncomeLevel)
 		
 		print experiment
