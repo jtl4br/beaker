@@ -121,8 +121,11 @@ def updateExperiment(experiment):
 			print ratio
 			print stat 
 		elif metric == :
-			m = NumTransactionsPastXMonths(data)
-
+			m = NumCustomersPastXMonths(data)
+			ans = m.calculate(args={'numMonths':3})
+			stat = m.stat()
+			print ratio
+			print stat 
 		else:
 			print 'Error'
 

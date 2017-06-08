@@ -68,8 +68,8 @@ class NumCustomersPastXMonths(Metric):
 		percentChanges = []
 		
 		for i in range(0, len(self.numCustomersList) - 1):
-			x1 = args['ratios'][i]
-			x2 = args['ratios'][i + 1]
+			x1 = self.numCustomersList[i]
+			x2 = self.numCustomersList[i + 1]
 			pChange = (x2 - x1)/x1
 			percentChanges.append(pChange)
 
