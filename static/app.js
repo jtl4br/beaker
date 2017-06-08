@@ -1,4 +1,4 @@
-var myApp = angular.module('myApp', ['ngRoute']);
+var myApp = angular.module('myApp',['ngRoute']);
 
 myApp.config(function ($routeProvider) {
     $routeProvider
@@ -14,6 +14,11 @@ myApp.config(function ($routeProvider) {
     .when('/view', {
         templateUrl: 'static/partials/viewExperiment.html',
         controller: 'viewExperimentController'
+
+    .when('/experiments/create', {
+        templateUrl: 'static/partials/createExperiment.html',
+        controller: 'createExperimentController'
+
     })
     .otherwise({
         redirectTo: '/'

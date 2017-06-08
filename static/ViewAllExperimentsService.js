@@ -1,14 +1,23 @@
 angular.module('myApp').factory('ViewAllExperimentsService',
 ['$timeout', '$http', '$q', function ($timeout, $http, $q) {
 
+    function getAllExperiments() {
+        return $http.get('/api/Experiment').then(function(response) {
+            console.log(response);
+            return response;
+        });
+    }
     function getExperiment(username) {
-        return $http.get('/api/Experiment', {params: {username: username}})
+        var defer = $q.defer();
+        $http.get('/api/Experiment', {params: {username: username}})
         .success(function (data) {
-            return data;
+            defer.resolve(data);
         })
         .error(function(data,status) {
-            console.error("Get experiment Error", status, data);
+            defer.reject("Get experiment error");
+            // console.error("Get experiment Error", status, data);
         });
+        return defer.promise;
     }
 
     function updateExperiment(username, major_name, year) {
@@ -23,7 +32,8 @@ angular.module('myApp').factory('ViewAllExperimentsService',
 
     return ({
         getExperiment: getExperiment,
-        updateExperiment: updateExperiment
+        updateExperiment: updateExperiment,
+        getAllExperiments: getAllExperiments
     });
 }]);
 

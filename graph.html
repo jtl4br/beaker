@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        .graph .axis {
+            stroke-width: 1;
+        }
+
+        .graph .axis .tick line {
+            stroke: black;
+        }
+
+        .graph .axis .tick text {
+            fill: black;
+            font-size: 0.7em;
+        }
+
+        .graph .axis .domain {
+            fill: none;
+            stroke: black;
+        }
+
+        .graph .group {
+            fill: none;
+            stroke: black;
+            stroke-width: 1.5;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="graph"></div>
+
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script
+          src="https://code.jquery.com/jquery-3.2.1.min.js"
+          integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+          crossorigin="anonymous"></script>
+        <script>
+        var limit = 60 * 1,
+            duration = 750,
+            now = new Date(Date.now() - duration)
+
+        var width = 500,
+            height = 200
+
+        var groups = {
+            current: {
+                value: 0,
+                color: 'orange',
+                data: d3.range(limit).map(function() {
+                    return 0
+                })
+            },
+        }
+
+        var x = d3.time.scale()
+            .domain([now - (limit - 2), now - duration])
+            .range([0, width])
+
+        var y = d3.scale.linear()
+            .domain([0, 100])
+            .range([height, 0])
+
+        var line = d3.svg.line()
+            .interpolate('basis')
+            .x(function(d, i) {
+                return x(now - (limit - 1 - i) * duration)
+            })
+            .y(function(d) {
+                return y(d)
+            })
+
+        var svg = d3.select('.graph').append('svg')
+            .attr('class', 'chart')
+            .attr('width', width)
+            .attr('height', height + 50)
+
+        var axis = svg.append('g')
+            .attr('class', 'x axis')
+            .attr('transform', 'translate(0,' + height + ')')
+            .call(x.axis = d3.svg.axis().scale(x).orient('bottom'))
+
+        var paths = svg.append('g')
+
+        for (var name in groups) {
+            var group = groups[name]
+            group.path = paths.append('path')
+                .data([group.data])
+                .attr('class', name + ' group')
+                .style('stroke', group.color)
+        }
+
+        var mostRecent = new Date()
+
+        function tick() {
+            now = new Date()
+
+            dates = []
+
+            // Add new values
+            for (var name in groups) {
+                var group = groups[name]
+
+                data = [
+                    {
+                      "date": "Thu, 08 Jun 2017 10:14:35 GMT", 
+                      "val": 104.02012452427749
+                    }, 
+                    {
+                      "date": "Thu, 08 Jun 2017 10:16:35 GMT", 
+                      "val": 117.42093152983257
+                    }, 
+                    {
+                      "date": "Thu, 08 Jun 2017 10:18:35 GMT", 
+                      "val": 46.23536345930228
+                    }, 
+                    {
+                      "date": "Thu, 08 Jun 2017 10:20:35 GMT", 
+                      "val": 50.28584203301041
+                    }, 
+                    {
+                      "date": "Thu, 08 Jun 2017 10:22:35 GMT", 
+                      "val": 96.0824528360088
+                    }
+                  ]
+
+                  for(var i = 0; i < data.length; i++) {
+                      var obj = data[i];
+                      group.data.push(obj.val)
+                      dates.push(obj.date)
+                      console.log(obj);
+                  }
+                  group.path.attr('d', line)
+                // $.getJSON('http://localhost:5000/api/data/pChange?experimentId=test', function(data) {
+                //   //data is the JSON string
+                //   for(var i = 0; i < data.length; i++) {
+                //       var obj = data[i];
+                //       group.data.push(obj.val)
+                //       dates.push(obj.date)
+                //       console.log(obj);
+                //   }
+                //   group.path.attr('d', line)
+                // });
+            }
+
+            // Shift domain
+            x.domain([now - (limit - 2) * duration, now - duration])
+
+            // Slide x-axis left
+            axis.transition()
+                .duration(duration)
+                .ease('linear')
+                .call(x.axis)
+
+            // Slide paths left
+            paths.attr('transform', null)
+                .transition()
+                .duration(duration)
+                .ease('linear')
+                .attr('transform', 'translate(' + x(now - (limit - 1) * duration) + ')')
+                .each('end', tick)
+
+            // Remove oldest data point from each group
+            for (var name in groups) {
+                var group = groups[name]
+                group.data.shift()
+            }
+        }
+
+        tick()
+        </script>
+    </body>
+</html>
