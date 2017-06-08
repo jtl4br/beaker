@@ -124,7 +124,7 @@ def updateExperiment(experiment):
 			m = NumCustomers(data)
 			ans = m.calculate()
 			stat = m.stat()
-			print ratio
+			print ans
 			print stat 
 		else:
 			print 'Error'
