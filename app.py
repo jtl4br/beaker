@@ -13,7 +13,7 @@ app = Flask(__name__)
 api = Api(app)
 sched = BackgroundScheduler()
 sched.start()
-startupSavedExperiments()
+# startupSavedExperiments()
 
 # TODO
 def startupSavedExperiments():
@@ -47,26 +47,18 @@ class AuthenticateUser(Resource):
 			_userUsername = args['username']
 			_userPassword = args['password']
 
-			print _userUsername
-			print _userPassword
-
 			if _userUsername is None or _userPassword is None:
-				raise Exception('Username and password required')
+				return False;
 			users = Table('users', meta, autoload=True)
 
 			s = sqlalchemy.select([users]).where(users.c.username == _userUsername).where(users.c.password == _userPassword)
 
 			data = con.execute(s)
 			row = data.fetchone()
-			print row
 
 			if (row is not None):
-				print 'GOOD'
-				resp = Response(js, status=200, mimetype='application/json')
-				return resp
-			else:
-				print 'BAD'
-				return Response(js, status=100, mimetype='application/json')
+				return True;
+			return False;
 
 		except Exception as e:
 			return {'error': str(e)}
@@ -94,7 +86,7 @@ def filter(experiment):
 	return []
 
 def calcMetrics(messages, metrics):
-	for metric in metrics:
+	# for metric in metrics:
 	return []
 
 def updateExperiment(experiment):
@@ -174,9 +166,10 @@ class Experiment(Resource):
 		id = args['experimentId']
 		if args['experimentId'] == None: 
 			# Query DB for all experiments
+			print 'all experiments got'
 		else:
+			print 'one experiment got'
 			# Query DB for specified experiment
-
 		return 0
 
 	# Update an 'experiment'
@@ -203,8 +196,8 @@ class Experiment(Resource):
 
 		sched.remove_job(job_id)
 
-api.add_resource(AuthenticateUser, '/api/v1/AuthenticateUser')
-api.add_resource(Experiment, '/api/v1/Experiment')
+api.add_resource(AuthenticateUser, '/api/AuthenticateUser')
+api.add_resource(Experiment, '/api/Experiment')
 
 if __name__ == "__main__":
 	app.run()
