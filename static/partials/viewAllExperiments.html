@@ -1,19 +1,26 @@
 <div class="container-fluid">
 <div class="container jumbotron" align="center">
-	<h7><button id="create" class='btn btn-primary pull-right'>Create Experiment</button></h7>
+	<!-- <h7><button id="create" class='btn btn-primary pull-right'>Create Experiment</button></h7> -->
 	<br>
 	<h1>Experiments</h1>
+
+
+
+	</br>
+
 	<table>
-		<tr>
-			<td ng-repeat="experiment in experiments.data">
-			<div>
-				<img src="/static/partials/assets/img/experiment_icon.png" style="width:150px;height:150px;opacity:.5">
-			<h3 style="position:relative;top:-50px;">{{experiment.name}} {{experiment.active}}</h3>
-				</br
-			</div>
-		</tr>
-	</td>
-		<!-- <h1 ng-repeat="name in $scope.experiments"> {{name}}</h1> -->
+		<tr ng-repeat="exp in experiments.data">
+			<td>
+				<img src="/static/partials/assets/img/experiment_icon.png" ng-click="viewExperiment(exp.id);" style="width:150px;height:150px;"></br>
+				ID: {{exp.id}} </br>
+				Name: {{exp.name}} </br>
+				Product: {{exp.product}} </br>
+				Start Date: {{exp.start_date}} </br>
+				End Date: {{exp.end_date}} </br>
+				Active: {{exp.active}} </br>
+			</td>
+		
 	</table>
 </div>
 </div>
+
