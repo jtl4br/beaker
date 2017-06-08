@@ -313,6 +313,7 @@ def getPChange():
 @app.route("/data/values")
 def getValues():
 	id = request.args.get('expId')
+	data = []
 	values = experimentToMetrics[id]['value']
 	for x in values:
 		date = x[0]
