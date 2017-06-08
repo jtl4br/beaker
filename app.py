@@ -3,7 +3,7 @@ from flask_restful import Resource, Api, reqparse
 # from sqlalchemy i  mport create_engine
 import sqlalchemy
 from sqlalchemy import *
-from kafka import KafkaProducer
+from kafka import KafkaProducer, KafkaConsumer
 import datetime
 import json
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -34,8 +34,6 @@ def startupSavedExperiments():
 	# Spin up experiments saved in DB Experiment Table
 	return 0
 
-
-con, meta, db = connect('beaker')
 #startupSavedExperiments()
 
 class AuthenticateUser(Resource):
@@ -87,14 +85,15 @@ def login():
 
 
 def filter():
-	Get all query strings
+	# Get all query strings
+	print 'filtering'
 	expToQueryString = dict()
+	con, meta, db = connect('beaker')
 	expTable = Table('experiments', meta, autoload=True)
 	s = select([expTable])
-	result = conn.execute(s)
+	result = con.execute(s)
 	for row in result:
-		print row
-		expToQueryString[row[]] = row[]
+		expToQueryString[row[10]] = row[10]
 	
 	for exp in expToQueryString:
 		query_string = expToQueryString[exp]
@@ -110,12 +109,17 @@ def filter():
 
 
 def updateExperiment(experiment):
-	consumer = KafkaConsumer(experiment['id'])
+	con, meta, db = connect('beaker')
+	job_id = experiment['id']
+	consumer = KafkaConsumer(job_id)
+
+	print job_id
+	print consumer
+	
 	data = []
 	for msg in consumer:
 		data.add(tuple(msg.value))
 	
-	job_id = experiment['id']
 
 	for metric in experiment['metrics']:
 		if metric == 'RatioAmountToBalance':
@@ -152,98 +156,108 @@ def default(obj):
 
 class Experiment(Resource):
 	def post(self):
-		parser = reqparse.RequestParser()
 
-		# Experiment Metadata
-		parser.add_argument('name', type=str, required=True, help='experiment name')
-		parser.add_argument('product', type=str, required=True, help='product we are collecting from')
-		parser.add_argument('target', type=str, required=True, help='feature we are collecting from')
-		parser.add_argument('startDate', type=str, required=True, help='start date')
-		parser.add_argument('endDate', type=str, required=True, help='end date - when to stop the data collection')
-		parser.add_argument('active', type=bool, required=True, help='')
+		con, meta, db = connect('beaker')
+		# parser = reqparse.RequestParser()
+		# # Experiment Metadata
+		# parser.add_argument('name', type=str, required=True, help='experiment name')
+		# parser.add_argument('product', type=str, required=True, help='product we are collecting from')
+		# parser.add_argument('target', type=str, required=True, help='feature we are collecting from')
+		# parser.add_argument('startDate', type=str, required=True, help='start date')
+		# parser.add_argument('endDate', type=str, required=True, help='end date - when to stop the data collection')
+		# parser.add_argument('active', type=bool, required=True, help='')
 		
-		# Population Category (default should be 'all')
-		parser.add_argument('ageLower', type=int, required=True, help='age category')
-		parser.add_argument('ageUpper', type=int, required=True, help='age category')
+		# # Population Category (default should be 'all')
+		# parser.add_argument('ageLower', type=int, required=True, help='age category')
+		# parser.add_argument('ageUpper', type=int, required=True, help='age category')
 
-		parser.add_argument('geo', type=int, required=True, help='geographic category')
-		parser.add_argument('incomeLevel', type=int, required=True, help='income category')
+		# parser.add_argument('geo', type=int, required=True, help='geographic category')
+		# parser.add_argument('incomeLevel', type=int, required=True, help='income category')
 		
-		# Metrics
-		parser.add_argument('metric', action='append', required=True, help='all metrics')
-		args = parser.parse_args()
+		# # Metrics
+		# parser.add_argument('metric', action='append', required=True, help='all metrics')
+		# args = parser.parse_args()
 
 		_expId = str(uuid.uuid4())
-		_expName= args['name']
-		_expProduct = args['product']
-		_expTarget = args['target']
+		_expName= request.form['name']
+		_expProduct = request.form['product']
+		_expTarget = int(request.form['target'])
 		
-		_expStartDate = datetime.strptime(_expStartDate , '%Y-%m-%d 00:00:00')
-		_expEndDate = datetime.strptime(_expEndDate , '%Y-%m-%d 00:00:00')
-		_expActive = args['active'] # State for whether the experiment should be collecting or not (pause)
+		_expStartDate = datetime.strptime(request.form['startDate'] , '%Y-%m-%d')
+		_expEndDate = datetime.strptime(request.form['endDate'] , '%Y-%m-%d')
+		_expActive = bool(request.form['active']) # State for whether the experiment should be collecting or not (pause)
 
 
-		_expAgeLower = args['ageLower']
-		_expAgeUpper = args['ageUpper']
+		_expAgeLower = int(request.form['ageLower'])
+		_expAgeUpper = int(request.form['ageUpper'])
 
-		_expGeoGroup = args['geo']
-		_expIncomeLevel = args['incomeLevel']
+		_expGeoGroup = int(request.form['geo'])
+		_expIncomeLevel = int(request.form['incomeLevel'])
 
-		_expMetrics = args['metric'] # Returns a list of predefined metrics codenames
+		_expMetrics1 = bool(request.form['metric1']) # Returns a list of predefined metrics codenames
+		_expMetrics2 = bool(request.form['metric2']) # Returns a list of predefined metrics codenames
 
-		#insert experiment into experiments
-		_expInsertString = []
-		_expInsertString.append('INSERT INTO EXPERIMENTS (NAME,PRODUCT,START_DATE,END_DATE,ACTIVE,TARGET,AGE_L,AGE_U,GEOGROUP,INCOMEGROUP) VALUES (')
-		_expInsertString.append(_expName,_expProduct,_expStartDate,_expEndDate,_expActive,_expTarget,_expAgeLower,_expAgeUpper,_expGeoGroup,_expIncomeLevel)
-		_expInsertString.append(');')
-		('').join(_expInsertString)
+		# insert experiment into experiments
+		# _expInsertString = []
+		# _expInsertString.append('INSERT INTO EXPERIMENTS (NAME,PRODUCT,START_DATE,END_DATE,ACTIVE,TARGET,AGE_L,AGE_U,GEOGROUP,INCOMEGROUP) VALUES (')
+		# _expInsertString.append(str(_expName))
+		# _expInsertString.append(',')
+		# _expInsertString.append(str(_expActive))
+		# _expInsertString.append(',')
+		# _expInsertString.append(str(_expTarget))
+		# _expInsertString.append(',')
+		# _expInsertString.append(str(_expAgeLower))
+		# _expInsertString.append(',')
+		# _expInsertString.append(str(_expAgeUpper))
+		# _expInsertString.append(',')
+		# _expInsertString.append(');')
+		# _expInsertString = ''.join(_expInsertString)
+		# con.execute(_expInsertString)
 
 		#build table for data
-		if _expTarget == 0:
-			dataTable = Table(_expName+'_data', meta,
-				Column('id', Integer, Sequence(_expName + '_id_seq'), primary_key=True),
-				Column('name', String(30)),
-				Column('card_type', String(20)),
-				Column('region', Integer),
-				Column('age',Integer),
-				Column('prev_num_card', Integer),
-				Column('date', timestamp)
-			)
-		elif _expTarget == 1:
-			dataTable = Table(_expName+'_data', meta,
-				Column('id', Integer, Sequence(_expName + '_id_seq'), primary_key=True),
-				Column('name', String(30)),
-				Column('card_type', String(20)),
-				Column('transaction_type', String(20)),
-				Column('amount', Integer),
-				Column('balance', Integer),
-				Column('max_limit', Integer),
-				Column('region', Integer),
-				Column('age',Integer),
-				Column('income', Integer),
-				Column('date', timestamp)
-			)
+		# if _expTarget == 0:
+		# 	dataTable = Table(_expName+'_data', meta,
+		# 		Column('id', Integer, Sequence(_expName + '_id_seq'), primary_key=True),
+		# 		Column('name', String(30)),
+		# 		Column('card_type', String(20)),
+		# 		Column('region', Integer),
+		# 		Column('age',Integer),
+		# 		Column('prev_num_card', Integer),
+		# 		Column('date', timestamp)
+		# 	)
+		# elif _expTarget == 1:
+		# 	dataTable = Table(_expName+'_data', meta,
+		# 		Column('id', Integer, Sequence(_expName + '_id_seq'), primary_key=True),
+		# 		Column('name', String(30)),
+		# 		Column('card_type', String(20)),
+		# 		Column('transaction_type', String(20)),
+		# 		Column('amount', Integer),
+		# 		Column('balance', Integer),
+		# 		Column('max_limit', Integer),
+		# 		Column('region', Integer),
+		# 		Column('age',Integer),
+		# 		Column('income', Integer),
+		# 		Column('date', timestamp)
+		# 	)
 
-		meta.create_all()
+		# meta.create_all()
 
 		### TODO - build query string
-		_expQueryString = []
-		_expQueryString.append('SELECT * from {} '.format(_expName + '_data'))
-		_expQueryString.append('WHERE card_type = {} '.format(_expProduct))
-		_expQueryString.append('AND date BETWEEN {} AND {} '.format(_expStartDate,_expEndDate))
-		_expQueryString.append('AND age BETWEEN {} AND {} '.format(_expAgeLower,_expAgeUpper))
 
-		#add region/income maybe
-		_expQueryString.append('AND region IN {} '.format(_expGeoGroup))
-		_expQueryString.append('AND income IN {}'.format(_expIncomeLevel))
+		whichTable = None
+		if (_expTarget == 0):
+			whichTable = 'transactions'
+		else:
+			whichTable = 'customer'
 
-		_expQueryString.append(');')
-		('').join(_expQueryString)
+		q1 = 'SELECT * from {} WHERE card_type = {} AND date '.format(whichTable, _expProduct)
+		q2 = 'BETWEEN \'{}\' AND \'{}\' AND age BETWEEN {} AND {} '.format(_expStartDate, _expEndDate,_expAgeLower, _expAgeUpper)
+		q3 = 'AND region = \'{}\' AND income = {};'.format(_expGeoGroup, _expIncomeLevel)
+		_expQueryString = q1 + q2 + q3
 
 		result = con.execute(_expQueryString)
 		toReturn = result.fetchall()
 
-		print _expQueryString
 		# Spin up a new experiment job
 		populationData = {'ageLower': _expAgeLower, 'ageUpper': _expAgeUpper, 'geo': _expGeoGroup, 'incomeLevel': _expIncomeLevel}
 		experiment = {'id': _expId,
@@ -253,29 +267,26 @@ class Experiment(Resource):
 					  'endDate': _expEndDate, 
 					  'active': _expActive, 
 					  'population': populationData, 
-					  'metrics':expMetrics,
+					  'metric1':_expMetrics1,
+					  'metric2':_expMetrics2,
 					  'queryString':_expQueryString # <---TODO: Add column to database
 					  }
-		sched.add_job(updateExperiment, 'interval',
-					  kwargs={'experiment':experiment}, 
-					  id=_expId,
-					  start_date=_expStartDate, 
-					  end_date=_expEndDate)
+		
+		# sched.add_job(updateExperiment, 'interval',
+		# 			  kwargs={'experiment':experiment}, 
+		# 			  id=_expId,
+		# 			  start_date=_expStartDate, 
+		# 			  end_date=_expEndDate)
 
 		# Persist to the local database
-		expTable = Table('experiment', meta, autoload=True)
+		expTable = Table('experiments', meta, autoload=True)
 		i = expTable.insert()
 		i.execute(id=_expId, name=_expName, 
 				  product=_expProduct, target=_expTarget, 
-				  active=_expShouldCollect, start_date=_expEndDate, 
-				  end_date=_expEndDate, ageLower=_expAgeLower, ageUpper=_expAgeUpper,
+				  active=_expActive, start_date=_expEndDate, 
+				  end_date=_expEndDate, agelower=_expAgeLower, ageupper=_expAgeUpper,
 				  geogroup=_expGeoGroup, incomegroup = _expIncomeLevel, 
-				  querystring=_expQueryString)
-		
-		print experiment
-		print job
-
-		return experiment
+				  querystring=_expQueryString, metric1=_expMetrics1, metric2=_expMetrics2)
 
 	# Gets the configuration of an experiment
 	def get(self):
@@ -362,7 +373,9 @@ class Values(Resource):
 			data.append({'date':date, 'val':val})
 		return 'a'
 
-sched.add_job(filter)
+import logging
+logging.basicConfig()
+# sched.add_job(filter)
 api.add_resource(AuthenticateUser, '/api/AuthenticateUser')
 api.add_resource(Experiment, '/api/Experiment')
 api.add_resource(PChange, '/api/data/pChange')
