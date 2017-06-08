@@ -141,7 +141,7 @@ def default(obj):
         #     obj.microsecond / 1000
         # )
         # return millis
-        obj = obj.strftime("%Y/%m/%d")
+        obj = obj.strftime("%Y-%m-%d")
     raise TypeError('Not sure how to serialize %s' % (obj,))
 
 class Experiment(Resource):
