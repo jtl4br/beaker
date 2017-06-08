@@ -14,6 +14,14 @@ angular.module('myApp').controller('viewAllExperimentsController',
 		$scope.viewExperiment = function(id) {
 			// console.log(id);
 			// TODO: Service needs to pull relevant experiment by ID and send to viewExperiment
+
+			// Set the selected experiment in the service
+			for (var i = 0, len = $scope.data.length; i < len; i++) {
+				if ($scope.data[i].id == id) {
+					ViewAllExperimentsService.setSelectedExperiment($scope.data[i]);
+				}
+			}
+
 			$location.path('/view');
 			$location
 		}
@@ -29,4 +37,4 @@ angular.module('myApp').controller('viewAllExperimentsController',
 		//	}
 		//});
 	
-}]);
+// }]);
