@@ -291,21 +291,12 @@ class Experiment(Resource):
 	# Gets the configuration of an experiment
 	def get(self):
 		try:
-			print 'doing al exp'
-			parser = reqparse.RequestParser()
-			parser.add_argument('experimentId', type=str, required=True, help='experiment id')
-			args = parser.parse_args()
-			_id = args['experimentId']
-			print 'one experiment got'
-			# Query DB for specified experiment
+			_id = request.args['experimentId']
 			return 0
 		except Exception as e:
-			print 'getting all experiments'
-			# Query DB for all experiments
 			experiments = Table('experiments', meta, autoload=True)
 			s = select([experiments])
 			result = con.execute(s)
-			print 'all experiments got'
 			return jsonify([dict(r) for r in result])
 
 
