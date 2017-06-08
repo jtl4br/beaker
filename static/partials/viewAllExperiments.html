@@ -4,51 +4,23 @@
 	<br>
 	<h1>Experiments</h1>
 
+
+
+	</br>
+
 	<table>
-		<tr>
-			<td ng-repeat="experiment in experiments.data">
-<div id="asdf" onclick="viewExperiment(this)">
-	
-<style type="text/css">
-#asdf {
-    width:200px;
-    height:200px;
-    background-color: #f0f0f0;
-    text-align: center;
-    padding-top:20%;
-    margin: 10px;
-}
-#image-fs {
-	display:none;
-	width:100%;
-	height:100%;
-	z-index: 999;
-}
-</style>
-
-<script>
-function viewExperiment(experiment) {
-	console.log("clicked");
-	document.getElementById("image-fs").style.display="block";
-	document.body.style.backgroundColor="#000";
-	document.getElementById("asdf").style.visibility="hidden";
-	var images = document.querySelectorAll(".container-images > img");
-	for (var i = 0; i < images.length; i++) {
-		images[i].style.visibility="hidden";
-	}
-	document.getElementsByClassName("container-images")[0].style.visibility="hidden";
-	document.getElementsByClassName("header")[0].style.visibility="hidden";
-	lastClickedImage = id;
-}
-
-</script>
-			<h3>{{experiment.name}} </h3>
-<h4 ng-if="experiment.active"> Active </h4>
-			</div>
-		</tr>
-	</td>
-		<!-- <h1 ng-repeat="name in $scope.experiments"> {{name}}</h1> -->
+		<tr ng-repeat="exp in experiments.data">
+			<td>
+				<img src="/static/partials/assets/img/experiment_icon.png" ng-click="viewExperiment(exp.id);" style="width:150px;height:150px;"></br>
+				ID: {{exp.id}} </br>
+				Name: {{exp.name}} </br>
+				Product: {{exp.product}} </br>
+				Start Date: {{exp.start_date}} </br>
+				End Date: {{exp.end_date}} </br>
+				Active: {{exp.active}} </br>
+			</td>
+		
 	</table>
 </div>
 </div>
-<div-id="image-fs"></div>
+

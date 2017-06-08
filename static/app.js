@@ -11,11 +11,16 @@ myApp.config(function ($routeProvider) {
         templateUrl: 'static/partials/viewAllExperiments.html',
         controller: 'viewAllExperimentsController'
     })
+    .when('/view', {
+        templateUrl: 'static/partials/viewExperiment.html',
+        controller: 'viewExperimentController'
+    })
     .when('/experiments/create', {
         templateUrl: 'static/partials/createExperiment.html',
         controller: 'createExperimentController'
+
     })
     .otherwise({
         redirectTo: '/'
     });
-})
+});

@@ -36,4 +36,4 @@ angular.module('myApp').controller('loginController',
           }
         });
     };
-}])
+}]);

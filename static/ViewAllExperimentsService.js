@@ -1,5 +1,6 @@
 angular.module('myApp').factory('ViewAllExperimentsService',
 ['$timeout', '$http', '$q', function ($timeout, $http, $q) {
+    var selectedExperiment;
 
     function getAllExperiments() {
         return $http.get('/api/Experiment').then(function(response) {
@@ -20,6 +21,16 @@ angular.module('myApp').factory('ViewAllExperimentsService',
         return defer.promise;
     }
 
+    function getSelectedExperiment() {
+        // FIXME: Code for sample data, not live data.
+        return selectedExperiment;
+    }
+
+    function setSelectedExperiment(experiment) {
+        // FIXME: Code for sample data, not live data.
+        selectedExperiment = experiment;
+    }
+
     function updateExperiment(username, major_name, year) {
         return $http.put('/api/Student', {username: username, major_name: major_name, year: year})
         .success(function (data) {
@@ -33,7 +44,9 @@ angular.module('myApp').factory('ViewAllExperimentsService',
     return ({
         getExperiment: getExperiment,
         updateExperiment: updateExperiment,
-        getAllExperiments: getAllExperiments
+        getAllExperiments: getAllExperiments,
+        getSelectedExperiment: getSelectedExperiment,
+        setSelectedExperiment: setSelectedExperiment
     });
 }]);
 
