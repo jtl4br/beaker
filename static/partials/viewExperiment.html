@@ -5,10 +5,27 @@
 	<div id="menuleftcontent" style="background-color:#CCCCCC;width:30%;height:100vh;float:left;margin:0px;">
 		<div align="center">
 		    <h2>{{selectedExperiment.name}}</h2>
+		    <h4>
 		    Product: {{selectedExperiment.product}} </br>
 		    Start Date: {{selectedExperiment.start_date}} </br>
 		    End Date: {{selectedExperiment.end_date}} </br>
 		    Active: {{selectedExperiment.active}} </br>
+		    <br>
+		    Target group: <span ngif="selectedExperiment.target == '0'"> New Customers </span>
+		    Geographic Region targeted: {{selectedExperiment.geogroup}} <br>
+		    Income Group targeted: {{selectedExperiment.incomegroup}}
+
+		    <br><br>
+		    Mean:<br>
+		    Median:<br>
+		    Mode:<br>
+		    % Change: <br>
+
+
+
+
+</h4>
+
 		    </br>
 		    </br>
 		    
