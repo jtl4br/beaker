@@ -18,7 +18,7 @@ class RatioAmountToBalance(Metric):
 		ans = []
 		for d in self.data:
 			ratio = float(d[0])/d[1]
-			ans.append(ratio)
+			ans.append((d[], ratio)) #(date, value)
 		return ans
 
 	def stat(self, args=None):
@@ -32,27 +32,30 @@ class RatioAmountToBalance(Metric):
 			x1 = args['ratios'][i]
 			x2 = args['ratios'][i + 1]
 			pChange = (x2 - x1)/x1
-			percentChanges.append(pChange)
+			percentChanges.append((self.data[], pChange)) #(date, value)
 
 		return (mean, median, stdDev, var, percentChanges)
 
 class NumCustomers(Metric):
 	def calculate(self, args):
-		numMonths = args['numMonths']
-		ans = len(self.data)
+		ans = (self.data[-1][ ], len(self.data)) #(date, value)
+		self.numCustomersList.append(ans)
 		return ans
 
 	def stat(self, args=None):
-		mean = np.mean(self.numCustomersList)
-		median = np.median(self.numCustomersList)
-		stdDev = np.std(self.numCustomersList)
-		var = np.var(self.numCustomersList)
+		dates = [a[0] for a in self.numCustomersList]
+		x = [a[1] for a in self.numCustomersList]
+
+		mean = np.mean(x)
+		median = np.median(x)
+		stdDev = np.std(x)
+		var = np.var(x)
 		percentChanges = []
 		
-		for i in range(0, len(self.numCustomersList) - 1):
-			x1 = self.numCustomersList[i]
-			x2 = self.numCustomersList[i + 1]
+		for i in range(0, len(x) - 1):
+			x1 = x[i]
+			x2 = x[i + 1]
 			pChange = (x2 - x1)/x1
-			percentChanges.append(pChange)
+			percentChanges.append((dates[i+1], pChange)) #(date, value)
 
 		return (mean, median, stdDev, var, percentChanges)

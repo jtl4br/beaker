@@ -37,8 +37,8 @@ def generateNewCustomerSignUpData():
     _previousNumCreditCards = random.randint(0,10)
     _date = str(datetime.datetime.now())
 
-    data = {'id':_id, 'cardType':_cardType, 'date':_date, 'name': _name, 'region': _region, 'income': _income, 'age': '_age', 'previousNumCreditCards': _previousNumCreditCards}
-    producer.send('main', data)
+    # data = {'id':_id, 'cardType':_cardType, 'date':_date, 'name': _name, 'region': _region, 'income': _income, 'age': '_age', 'previousNumCreditCards': _previousNumCreditCards}
+    # producer.send('main', data)
 
     beaker = Table('customer', meta, autoload=True)
     i = beaker.insert()
@@ -60,8 +60,8 @@ def generateNewTransactionData():
     _previousNumCreditCards = random.randint(0,10)
     _date = str(datetime.datetime.now())
 
-    data = {'id':_id, 'date':_date, 'cardType':_cardType, 'transactionType':_transactionType, 'name': _name, 'amount': _amount, 'balance':_balance, 'limit':_limit, 'region': _region, 'income': _income, 'age': _age, 'previousNumCreditCards': _previousNumCreditCards}
-    producer.send('main', data)
+    # data = {'id':_id, 'date':_date, 'cardType':_cardType, 'transactionType':_transactionType, 'name': _name, 'amount': _amount, 'balance':_balance, 'limit':_limit, 'region': _region, 'income': _income, 'age': _age, 'previousNumCreditCards': _previousNumCreditCards}
+    # producer.send('main', data)
 
     table = Table('transactions', meta, autoload=True)
     i = table.insert()

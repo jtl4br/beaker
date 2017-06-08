@@ -13,6 +13,7 @@ app = Flask(__name__)
 api = Api(app)
 
 sched = BackgroundScheduler()
+experimentToMetrics = dict()
 sched.start()
 
 def connect(db, host='localhost', port=5432):
@@ -102,10 +103,8 @@ def filter():
 		result = db.engine.execute(sql)
 
 		for row in result:
-			print row
 			producer = KafkaProducer()
 			producer.send(exp, str(row))
-
 
 
 def updateExperiment(experiment):
@@ -113,19 +112,18 @@ def updateExperiment(experiment):
 	data = []
 	for msg in consumer:
 		data.add(msg)
+
 	for metric in experiment['metrics']
 		if metric == 'RatioAmountToBalance':
 			m = RatioAmountToBalance(data)
 			ratios = m.calculate()
 			stat = m.stat(args={'ratios':ratios})
-			print ratio
-			print stat 
+			experimentToMetrics[experiment['id']] = {'value': ratios,'stat': stat}
 		elif metric == 'NumCustomers':
 			m = NumCustomers(data)
-			ans = m.calculate()
+			m.calculate()
 			stat = m.stat()
-			print ans
-			print stat 
+			experimentToMetrics[experiment['id']] = {'value': m.numCustomersList,'stat': stat}
 		else:
 			print 'Error'
 
@@ -179,6 +177,46 @@ class Experiment(Resource):
 
 		_expMetrics = args['metric'] # Returns a list of predefined metrics codenames
 
+		### TODO - build query string
+		_expQueryString = 'SELECT from {}'.format(_expTarget)
+
+		if _expAgeGroup == 0:
+
+		elif _expAgeGroup == 1:
+
+		elif _expAgeGroup == 2:
+
+		elif _expAgeGroup == 3:
+
+		elif _expAgeGroup == 4:
+			
+		else: #all
+
+		if _expAgeGroup == 0:
+
+		elif _expGeoGroup == 1:
+
+		elif _expGeoGroup == 2:
+
+		elif _expGeoGroup == 3:
+
+		elif _expGeoGroup == 4:
+
+		else: #all
+		
+		if _expIncomeLevel == 0:
+
+		elif _expIncomeLevel == 1:
+
+		elif _expIncomeLevel == 2:
+
+		elif _expIncomeLevel == 3:
+
+		elif _expIncomeLevel == 4:
+
+		else: #all
+
+
 		# Spin up a new experiment job
 		populationData = {'ageGroup': _expAgeGroup, 'geo': _expGeoGroup, 'incomeLevel': _expIncomeLevel}
 		experiment = {'id': _expId,
@@ -190,14 +228,11 @@ class Experiment(Resource):
 					  'population': populationData, 
 					  'metrics':expMetrics
 					  }
-		sched.add_job(updateExperiment, 
-					  'interval', 
+		sched.add_job(updateExperiment, 'interval'
 					  kwargs={'experiment':experiment}, 
-					  id=_expId, seconds=30, 
+					  id=_expId,
 					  start_date=_expStartDate, 
 					  end_date=_expEndDate)
-		print experiment
-		print job
 
 		# Persist to the local database
 		expTable = Table('experiment', meta, autoload=True)
@@ -208,6 +243,9 @@ class Experiment(Resource):
 				  end_date=_expEndDate, agegroup=_expAgeGroup,
 				  geogroup=_expGeoGroup, incomegroup = _expIncomeLevel)
 		
+		print experiment
+		print job
+
 		return experiment
 
 	# Gets the configuration of an experiment
@@ -254,6 +292,34 @@ class Experiment(Resource):
 
 		sched.remove_job(job_id)
 
+
+@app.route("/data/basicStats")
+def getBasicStats():
+	id = request.args.get('expId')
+	stat = experimentToMetrics[id]['stat']
+	data = {'mean': stat[0], 'median': stat[1], 'stdDv': stat[2], 'var': stat[3]}
+	return jsonify(data)
+
+@app.route("/data/pChange")
+def getPChange():
+	id = request.args.get('expId')
+	data = []
+	pChanges = experimentToMetrics[id]['stat'][4]
+	for x in pChanges:
+		date = x[0]
+		pChange = x[1]
+		data.append({'date':date, 'val':pChange})
+	return jsonify(data)
+
+@app.route("/data/values")
+def getValues():
+	id = request.args.get('expId')
+	values = experimentToMetrics[id]['value']
+	for x in values:
+		date = x[0]
+		val = x[1]
+		data.append({'date':date, 'val':val})
+	return jsonify(data)
 
 sched.add_job(filter)
 api.add_resource(AuthenticateUser, '/api/AuthenticateUser')
