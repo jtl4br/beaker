@@ -78,7 +78,7 @@ ALTER SEQUENCE customer_id_seq OWNED BY customer.id;
 --
 
 CREATE TABLE experiments (
-    id integer NOT NULL,
+    id text NOT NULL,
     name text NOT NULL,
     product text NOT NULL,
     start_date date NOT NULL,
@@ -87,7 +87,12 @@ CREATE TABLE experiments (
     target text,
     agegroup integer,
     geogroup integer,
-    incomegroup integer
+    incomegroup integer,
+    querystring text,
+    metric1 text,
+    metric2 text,
+    agelower integer,
+    ageupper integer
 );
 
 
@@ -119,7 +124,7 @@ ALTER SEQUENCE experiments_id_seq OWNED BY experiments.id;
 --
 
 CREATE TABLE transactions (
-    id integer NOT NULL,
+    id text NOT NULL,
     card_type text,
     transaction_type text,
     name text,
@@ -470,26 +475,8 @@ SELECT pg_catalog.setval('customer_id_seq', 147, true);
 -- Data for Name: experiments; Type: TABLE DATA; Schema: public; Owner: skim
 --
 
-COPY experiments (id, name, product, start_date, end_date, active, target, agegroup, geogroup, incomegroup) FROM stdin;
-1	01	gold	2017-06-06	2017-06-07	t	\N	\N	\N	\N
-2	02	gold	2017-06-06	2017-06-07	t	\N	\N	\N	\N
-3	03	silver	2017-06-05	2017-06-07	f	\N	\N	\N	\N
-4	04	platinum	2017-06-06	2017-06-07	t	\N	\N	\N	\N
-5	05	gold	2017-06-04	2017-06-05	t	\N	\N	\N	\N
-6	06	silver	2017-06-04	2017-06-05	t	\N	\N	\N	\N
-7	07	platinum	2017-06-04	2017-06-05	t	\N	\N	\N	\N
-8	08	silver	2017-06-04	2017-06-05	t	\N	\N	\N	\N
-9	09	platinum	2017-06-04	2017-06-05	t	\N	\N	\N	\N
-10	010	silver	2017-06-04	2017-06-05	t	\N	\N	\N	\N
-11	011	platinum	2017-06-04	2017-06-05	t	\N	\N	\N	\N
-12	012	silver	2017-06-04	2017-06-05	t	\N	\N	\N	\N
-13	013	gold	2017-06-04	2017-06-05	f	\N	\N	\N	\N
-14	014	platinum	2017-06-04	2017-06-05	t	\N	\N	\N	\N
-15	015	platinum	2017-06-04	2017-06-05	t	\N	\N	\N	\N
-16	016	gold	2017-06-04	2017-06-05	f	\N	\N	\N	\N
-17	017	gold	2017-06-04	2017-06-05	f	\N	\N	\N	\N
-18	018	platinum	2017-06-04	2017-06-05	t	\N	\N	\N	\N
-19	019	gold	2017-06-04	2017-06-05	f	\N	\N	\N	\N
+COPY experiments (id, name, product, start_date, end_date, active, target, agegroup, geogroup, incomegroup, querystring, metric1, metric2, agelower, ageupper) FROM stdin;
+0038b81f-b013-4f6e-98ee-de9096030db5	'world'	'gold'	2017-08-15	2017-08-15	t	0	\N	0	0	SELECT * from transactions WHERE card_type = 'gold' AND date BETWEEN '2017-04-23 00:00:00' AND '2017-08-15 00:00:00' AND age BETWEEN 30 AND 50 AND region = '0' AND income = 0;	true	true	30	50
 \.
 
 
@@ -797,7 +784,7 @@ COPY users (id, username, password) FROM stdin;
 --
 
 ALTER TABLE ONLY experiments
-    ADD CONSTRAINT experiments_pkey PRIMARY KEY (name);
+    ADD CONSTRAINT experiments_pkey PRIMARY KEY (id);
 
 
 --
