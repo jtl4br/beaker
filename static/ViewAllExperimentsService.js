@@ -2,17 +2,10 @@ angular.module('myApp').factory('ViewAllExperimentsService',
 ['$timeout', '$http', '$q', function ($timeout, $http, $q) {
 
     function getAllExperiments() {
-        var defer = $q.defer();
-        $http.get('/api/Experiment', {params: {}})
-        .success(function(data) {
-            console.log(data);
-            defer.resolve(data);
-        })
-        .error(function(data,status) {
-            defer.reject("Error");
-            // console.log("Get all experiment error", status, data);
+        return $http.get('/api/Experiment').then(function(response) {
+            console.log(response);
+            return response;
         });
-        return defer.promise;
     }
     function getExperiment(username) {
         var defer = $q.defer();
