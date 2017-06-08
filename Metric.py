@@ -36,7 +36,7 @@ class RatioAmountToBalance(Metric):
 
 		return (mean, median, stdDev, var, percentChanges)
 
-class NumTransactionsPastXMonths(Metric):
+class NumCustomersPastXMonths(Metric):
 	def monthdelta(date, delta):
 	    m, y = (date.month+delta) % 12, date.year + ((date.month)+delta-1) // 12
 	    if not m: m = 12
@@ -49,25 +49,25 @@ class NumTransactionsPastXMonths(Metric):
 		ans = 0
 		if numMonths == -1:
 			ans = len(data)
-			self.numTransactionsList.append(ans)
+			self.numCustomersList.append(ans)
 		else:
 			num = 0
 			XMonthsDateTime = monthdelta(datetime.now(), -1*numMonths)
 			for d in self.data:
 				if d[] < XMonthsDateTime:
 					num += 1
-			self.numTransactionsList.append(num)
+			self.numCustomersList.append(num)
 			ans = num
 		return ans
 
 	def stat(self, args=None):
-		mean = np.mean(self.numTransactionsList)
-		median = np.median(self.numTransactionsList)
-		stdDev = np.std(self.numTransactionsList)
-		var = np.var(self.numTransactionsList)
+		mean = np.mean(self.numCustomersList)
+		median = np.median(self.numCustomersList)
+		stdDev = np.std(self.numCustomersList)
+		var = np.var(self.numCustomersList)
 		percentChanges = []
 		
-		for i in range(0, len(self.numTransactionsList) - 1):
+		for i in range(0, len(self.numCustomersList) - 1):
 			x1 = args['ratios'][i]
 			x2 = args['ratios'][i + 1]
 			pChange = (x2 - x1)/x1

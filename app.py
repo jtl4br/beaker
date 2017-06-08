@@ -121,7 +121,7 @@ def updateExperiment(experiment):
 			print ratio
 			print stat 
 		elif metric == :
-			m = NumOfNewCustomers(data)
+			m = NumTransactionsPastXMonths(data)
 
 		else:
 			print 'Error'
@@ -232,11 +232,9 @@ class Experiment(Resource):
 	# Update an 'experiment'
 	def put(self):
 		parser.add_argument('experimentId', type=str, required=True, help='experiment id')
-		parser.add_argument('newName', type=str, required=True, help='new name')
 		parser.add_argument('active', type=bool, required=True, help='new active state')
 		
 		job_id = args['experimentId']
-		name = args['newName']
 		active = args['active']
 
 		if active == True:
@@ -244,7 +242,7 @@ class Experiment(Resource):
 		else:
 			sched.pause_job(job_id)
 		
-		# Update DB
+		# TODO: Update DB entry
 
 	# Deletes an experiment from the database
 	def delete(self):
